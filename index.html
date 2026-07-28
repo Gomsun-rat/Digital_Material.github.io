@@ -1,0 +1,2362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReadBridge - Your Bridge to Understanding English</title>
+    
+    <!-- Google Fonts: Inter and Comic Neue (Highly recommended for visual clarity) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome for accessible icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS for utility-first styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        :root {
+            --bg-cream: #FDFBF7;
+            --bg-cream-dark: #F5EFEB;
+            --color-subject: #2563EB;     /* Blue for Subject */
+            --color-verb: #16A34A;        /* Green for Past Simple Verb */
+            --color-complement: #EA580C;  /* Orange for Complements */
+            --color-navy: #0F172A;        /* Dark Blue for Typography */
+            
+            /* Presentation defaults */
+            --font-main: 'Comic Neue', 'Inter', sans-serif;
+            --line-spacing: 1.8;
+            --word-spacing: 0.18em;
+            --letter-spacing: 0.08em;
+            --text-base-size: 20px;
+        }
+
+        body {
+            font-family: var(--font-main);
+            line-height: var(--line-spacing);
+            letter-spacing: var(--letter-spacing);
+            word-spacing: var(--word-spacing);
+            font-size: var(--text-base-size);
+            background-color: var(--bg-cream);
+            color: var(--color-navy);
+            transition: all 0.3s ease;
+        }
+
+        /* High Contrast Mode overrides */
+        body.high-contrast {
+            background-color: #000000 !important;
+            color: #FFFFFF !important;
+            --color-navy: #FFFFFF !important;
+            --bg-cream: #000000 !important;
+            --bg-cream-dark: #1E293B !important;
+        }
+        body.high-contrast .card {
+            background-color: #111827 !important;
+            border-color: #FFFFFF !important;
+            color: #FFFFFF !important;
+        }
+
+        /* Focus mode hiding distraction classes */
+        .focus-mode-active .distraction-element {
+            display: none !important;
+        }
+
+        /* Color coding classes */
+        .token-subject {
+            color: var(--color-subject) !important;
+            font-weight: bold;
+        }
+        .token-verb {
+            color: var(--color-verb) !important;
+            font-weight: bold;
+            border-bottom: 3px dashed var(--color-verb);
+        }
+        .token-complement {
+            color: var(--color-complement) !important;
+            font-weight: bold;
+        }
+
+        /* Custom active sentence indicator */
+        .highlighted-sentence {
+            background-color: rgba(254, 240, 138, 0.6); /* Soft yellow glow */
+            border-radius: 4px;
+            padding: 2px 6px;
+            border-left: 5px solid #EAB308;
+        }
+        body.high-contrast .highlighted-sentence {
+            background-color: #3730A3 !important;
+            border-left: 5px solid #6366F1;
+        }
+
+        /* Big tap targets for modern layouts and touch devices */
+        .tap-target {
+            min-height: 48px;
+            min-width: 48px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased">
+
+    <!-- Navigation Control Bar (Sticky & easy to access) -->
+    <header class="bg-slate-900 text-white shadow-md z-50 py-3 px-4 distraction-element">
+        <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-3">
+            <div class="flex items-center gap-2">
+                <span class="text-2xl font-bold tracking-wider text-amber-400">🌉 ReadBridge</span>
+                <span class="text-sm bg-slate-800 text-slate-300 px-2 py-1 rounded hidden sm:inline-block">A1–A2 English Workbook Companion</span>
+            </div>
+            <div class="flex items-center gap-3 flex-wrap">
+                <!-- Direct Navigation Links -->
+                <button onclick="window.location.hash='#home'" class="px-3 py-1.5 rounded bg-slate-800 hover:bg-slate-700 text-sm font-semibold tap-target">
+                    <i class="fa-solid fa-house mr-1"></i> Home
+                </button>
+                <button onclick="window.location.hash='#progress'" class="px-3 py-1.5 rounded bg-slate-800 hover:bg-slate-700 text-sm font-semibold tap-target">
+                    <i class="fa-solid fa-star mr-1 text-yellow-400"></i> Progress
+                </button>
+                <button onclick="window.location.hash='#preferences'" class="px-3 py-1.5 rounded bg-indigo-700 hover:bg-indigo-600 text-sm font-semibold tap-target">
+                    <i class="fa-solid fa-sliders mr-1"></i> Reading Preferences
+                </button>
+                <button onclick="window.location.hash='#teacher'" class="px-3 py-1.5 rounded bg-slate-800 hover:bg-slate-700 text-sm font-semibold tap-target">
+                    <i class="fa-solid fa-chalkboard-user mr-1"></i> Teacher Info
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow flex flex-col max-w-4xl w-full mx-auto p-4 md:p-6" id="app-container">
+        <!-- Views dynamically injected here -->
+        <div class="text-center p-12">
+            <i class="fa-solid fa-spinner fa-spin text-4xl text-slate-500 mb-4"></i>
+            <p>Loading your ReadBridge English workbook...</p>
+        </div>
+    </main>
+
+    <!-- Accessible Fixed Footer Info -->
+    <footer class="bg-slate-100 text-slate-600 border-t border-slate-200 py-6 px-4 mt-auto distraction-element text-center text-sm">
+        <p class="mb-2"><strong>ReadBridge: Your Bridge to Understanding English</strong></p>
+        <p class="max-w-xl mx-auto text-xs text-slate-500">
+            This digital application works interactively with the printed ReadBridge English Workbook. Personalized spacing, voice features, clear typography, and oral practice options are built in to guarantee a custom study environment.
+        </p>
+    </footer>
+
+    <script>
+        const UNIT_DATA = {
+            1: {
+                title: "Daily Routines",
+                slug: "daily-routines",
+                tense: "Simple Present",
+                reading: [
+                    "Every weekday, Mia wakes up at seven o'clock.",
+                    "She gets dressed, eats breakfast, and walks to school with her brother.",
+                    "In class, Mia listens to her teachers and writes in her notebook.",
+                    "After school, she does her homework and helps her mother at home.",
+                    "At night, she reads for a few minutes and goes to bed at ten o'clock."
+                ],
+                vocabulary: [
+                    { word: "wake up", spanish: "despertarse", definition: "To stop sleeping and become awake.", example: "Mia wakes up at seven o'clock.", icon: "⏰" },
+                    { word: "get dressed", spanish: "vestirse", definition: "To put on your clothes.", example: "She gets dressed before breakfast.", icon: "👕" },
+                    { word: "breakfast", spanish: "desayuno", definition: "The first meal of the day.", example: "Mia eats breakfast at home.", icon: "🥣" },
+                    { word: "walk", spanish: "caminar", definition: "To move on foot.", example: "She walks to school.", icon: "🚶‍♀️" },
+                    { word: "homework", spanish: "tarea", definition: "School work completed at home.", example: "She does her homework after school.", icon: "📚" },
+                    { word: "go to bed", spanish: "irse a dormir", definition: "To go to your bed to sleep.", example: "Mia goes to bed at ten o'clock.", icon: "🛏️" }
+                ],
+                grammar: {
+                    title: "Simple Present: Daily Routines",
+                    explanation: "Use the Simple Present to describe routines, habits, and actions that happen regularly. Add -s or -es with he, she, and it.",
+                    colorCodeTitle: "Simple Present Formula:",
+                    formula: [
+                        { text: "Mia", role: "subject", desc: "Subject" },
+                        { text: "walks", role: "verb", desc: "Simple Present verb" },
+                        { text: "to school every day.", role: "complement", desc: "Complement / frequency" }
+                    ],
+                    examples: [
+                        { subject: "I", verb: "wake up", complement: "at seven o'clock." },
+                        { subject: "Mia", verb: "eats", complement: "breakfast at home." },
+                        { subject: "She", verb: "walks", complement: "to school." },
+                        { subject: "We", verb: "do", complement: "our homework." }
+                    ]
+                },
+                comprehension: [
+                    { question: "What time does Mia wake up?", options: ["At seven o'clock", "At eight o'clock", "At nine o'clock"], correct: "At seven o'clock", hint: "Read the first sentence." },
+                    { question: "Who walks to school with Mia?", options: ["Her brother", "Her cousin", "Her friend"], correct: "Her brother", hint: "Look at the second sentence." },
+                    { question: "What does Mia write in?", options: ["Her notebook", "A newspaper", "A menu"], correct: "Her notebook", hint: "Look for the word 'writes'." },
+                    { question: "What does she do after school?", options: ["She does her homework", "She goes shopping", "She plays tennis"], correct: "She does her homework", hint: "Read the fourth sentence." },
+                    { question: "What time does she go to bed?", options: ["At ten o'clock", "At nine o'clock", "At eleven o'clock"], correct: "At ten o'clock", hint: "Read the final sentence." }
+                ],
+                sentenceBuilder: [
+                    "Mia / wakes up / at seven o'clock.",
+                    "She / eats / breakfast at home.",
+                    "Mia / walks / to school.",
+                    "She / does / her homework.",
+                    "She / goes / to bed at ten o'clock."
+                ],
+                finalPractice: [
+                    { text: "Mia _____ up at seven o'clock.", gap: "wakes", choices: ["wakes", "wake", "woke"] },
+                    { text: "She _____ breakfast at home.", gap: "eats", choices: ["eats", "eat", "ate"] },
+                    { text: "Mia and her brother _____ to school.", gap: "walk", choices: ["walk", "walks", "walked"] },
+                    { text: "She _____ her homework after school.", gap: "does", choices: ["does", "do", "did"] },
+                    { text: "She _____ to bed at ten o'clock.", gap: "goes", choices: ["goes", "go", "went"] }
+                ]
+            },
+            2: {
+                title: "A Busy Weekend",
+                slug: "a-busy-weekend",
+                tense: "Past Simple — Regular Verbs",
+                reading: [
+                    "Last weekend, Daniel stayed at home with his family.",
+                    "On Saturday morning, he cleaned his bedroom and organized his school materials.",
+                    "Later, he helped his father, washed the car, and prepared sandwiches for lunch.",
+                    "In the afternoon, Daniel visited his grandmother and watched a movie with her.",
+                    "He enjoyed the weekend because he completed many useful activities."
+                ],
+                vocabulary: [
+                    { word: "stayed", spanish: "se quedó", definition: "Remained in a place.", example: "Daniel stayed at home.", icon: "🏠" },
+                    { word: "cleaned", spanish: "limpió", definition: "Removed dirt or made a place tidy.", example: "He cleaned his bedroom.", icon: "🧹" },
+                    { word: "organized", spanish: "organizó", definition: "Put things in a clear order.", example: "He organized his materials.", icon: "🗂️" },
+                    { word: "helped", spanish: "ayudó", definition: "Gave assistance to someone.", example: "He helped his father.", icon: "🤝" },
+                    { word: "visited", spanish: "visitó", definition: "Went to see a person or place.", example: "Daniel visited his grandmother.", icon: "👵" },
+                    { word: "enjoyed", spanish: "disfrutó", definition: "Had a good time doing something.", example: "He enjoyed the weekend.", icon: "😊" }
+                ],
+                grammar: {
+                    title: "Past Simple: Regular Verbs",
+                    explanation: "Use the Past Simple for completed actions in the past. Most regular verbs add -ed. Some verbs ending in -e add only -d.",
+                    colorCodeTitle: "Past Simple Regular Formula:",
+                    formula: [
+                        { text: "Daniel", role: "subject", desc: "Subject" },
+                        { text: "cleaned", role: "verb", desc: "Regular past verb" },
+                        { text: "his bedroom on Saturday.", role: "complement", desc: "Complement / past time" }
+                    ],
+                    examples: [
+                        { subject: "Daniel", verb: "cleaned", complement: "his bedroom." },
+                        { subject: "He", verb: "helped", complement: "his father." },
+                        { subject: "Daniel", verb: "visited", complement: "his grandmother." },
+                        { subject: "They", verb: "watched", complement: "a movie." }
+                    ]
+                },
+                comprehension: [
+                    { question: "Where did Daniel stay?", options: ["At home", "At school", "At a hotel"], correct: "At home", hint: "Read the first sentence." },
+                    { question: "What did he clean?", options: ["His bedroom", "The kitchen", "The classroom"], correct: "His bedroom", hint: "Look at Saturday morning." },
+                    { question: "Who did Daniel help?", options: ["His father", "His teacher", "His friend"], correct: "His father", hint: "Read the third sentence." },
+                    { question: "Who did he visit?", options: ["His grandmother", "His cousin", "His coach"], correct: "His grandmother", hint: "Read the fourth sentence." },
+                    { question: "Why did he enjoy the weekend?", options: ["He completed useful activities", "He bought a new phone", "He traveled abroad"], correct: "He completed useful activities", hint: "Read the last sentence." }
+                ],
+                sentenceBuilder: [
+                    "Daniel / stayed / at home.",
+                    "He / cleaned / his bedroom.",
+                    "He / helped / his father.",
+                    "Daniel / visited / his grandmother.",
+                    "They / watched / a movie."
+                ],
+                finalPractice: [
+                    { text: "Daniel _____ at home last weekend.", gap: "stayed", choices: ["stayed", "stay", "stays"] },
+                    { text: "He _____ his bedroom.", gap: "cleaned", choices: ["cleaned", "cleans", "clean"] },
+                    { text: "He _____ his father with the car.", gap: "helped", choices: ["helped", "helps", "help"] },
+                    { text: "Daniel _____ his grandmother.", gap: "visited", choices: ["visited", "visits", "visit"] },
+                    { text: "They _____ a movie together.", gap: "watched", choices: ["watched", "watch", "watches"] }
+                ]
+            },
+            3: {
+                title: "Emma's Trip to the Zoo",
+                slug: "emmas-trip-to-the-zoo",
+                tense: "Past Simple — Irregular Verbs",
+                reading: [
+                    "Last Sunday, Emma went to the zoo with her parents.",
+                    "They saw lions, monkeys, elephants, and a very tall giraffe.",
+                    "Emma took many pictures and gave some food to the animals in a special area.",
+                    "At noon, the family ate sandwiches and drank cold water.",
+                    "Emma had a wonderful day and wrote about the trip in her notebook."
+                ],
+                vocabulary: [
+                    { word: "went", spanish: "fue", definition: "Past form of go.", example: "Emma went to the zoo.", icon: "🚌" },
+                    { word: "saw", spanish: "vio", definition: "Past form of see.", example: "They saw many animals.", icon: "👀" },
+                    { word: "took", spanish: "tomó", definition: "Past form of take.", example: "Emma took many pictures.", icon: "📸" },
+                    { word: "gave", spanish: "dio", definition: "Past form of give.", example: "She gave food to the animals.", icon: "🥕" },
+                    { word: "ate", spanish: "comió", definition: "Past form of eat.", example: "The family ate sandwiches.", icon: "🥪" },
+                    { word: "wrote", spanish: "escribió", definition: "Past form of write.", example: "Emma wrote about the trip.", icon: "✍️" }
+                ],
+                grammar: {
+                    title: "Past Simple: Irregular Verbs",
+                    explanation: "Irregular verbs do not use the regular -ed ending. Their past forms change, so learn them through examples and frequent practice.",
+                    colorCodeTitle: "Past Simple Irregular Formula:",
+                    formula: [
+                        { text: "Emma", role: "subject", desc: "Subject" },
+                        { text: "went", role: "verb", desc: "Irregular past verb" },
+                        { text: "to the zoo last Sunday.", role: "complement", desc: "Complement / past time" }
+                    ],
+                    examples: [
+                        { subject: "Emma", verb: "went", complement: "to the zoo." },
+                        { subject: "They", verb: "saw", complement: "many animals." },
+                        { subject: "She", verb: "took", complement: "pictures." },
+                        { subject: "The family", verb: "ate", complement: "sandwiches." }
+                    ]
+                },
+                comprehension: [
+                    { question: "Where did Emma go?", options: ["To the zoo", "To the museum", "To the beach"], correct: "To the zoo", hint: "Read the first sentence." },
+                    { question: "What animals did they see?", options: ["Lions, monkeys, elephants, and a giraffe", "Only birds", "Dolphins and sharks"], correct: "Lions, monkeys, elephants, and a giraffe", hint: "Read the second sentence." },
+                    { question: "What did Emma take?", options: ["Many pictures", "A test", "A bicycle"], correct: "Many pictures", hint: "Look for the verb 'took'." },
+                    { question: "What did the family eat?", options: ["Sandwiches", "Pizza", "Ice cream"], correct: "Sandwiches", hint: "Read the fourth sentence." },
+                    { question: "Where did Emma write about the trip?", options: ["In her notebook", "On a wall", "In a newspaper"], correct: "In her notebook", hint: "Read the last sentence." }
+                ],
+                sentenceBuilder: [
+                    "Emma / went / to the zoo.",
+                    "They / saw / many animals.",
+                    "Emma / took / many pictures.",
+                    "The family / ate / sandwiches.",
+                    "Emma / wrote / in her notebook."
+                ],
+                finalPractice: [
+                    { text: "Emma _____ to the zoo last Sunday.", gap: "went", choices: ["went", "go", "goed"] },
+                    { text: "They _____ many animals.", gap: "saw", choices: ["saw", "see", "seen"] },
+                    { text: "Emma _____ many pictures.", gap: "took", choices: ["took", "take", "taked"] },
+                    { text: "The family _____ sandwiches.", gap: "ate", choices: ["ate", "eat", "eated"] },
+                    { text: "Emma _____ about the trip.", gap: "wrote", choices: ["wrote", "write", "writed"] }
+                ]
+            },
+            4: {
+                title: "Leo's Future Dreams",
+                slug: "leos-future-dreams",
+                tense: "Future with WILL",
+                reading: [
+                    "Leo has many dreams for his future.",
+                    "He will study science because he wants to understand the universe.",
+                    "He will travel to different countries and will meet people from many cultures.",
+                    "Leo will also help his community and will protect the environment.",
+                    "He knows that he will work hard, but he believes his future will be exciting."
+                ],
+                vocabulary: [
+                    { word: "future", spanish: "futuro", definition: "The time that comes after the present.", example: "Leo thinks about his future.", icon: "🔮" },
+                    { word: "dream", spanish: "sueño / meta", definition: "Something you strongly hope to do or achieve.", example: "Leo has an important dream.", icon: "🌟" },
+                    { word: "study", spanish: "estudiar", definition: "To learn about a subject.", example: "He will study science.", icon: "🔬" },
+                    { word: "travel", spanish: "viajar", definition: "To go from one place to another.", example: "He will travel to different countries.", icon: "✈️" },
+                    { word: "community", spanish: "comunidad", definition: "People who live or work in the same area.", example: "Leo will help his community.", icon: "🏘️" },
+                    { word: "protect", spanish: "proteger", definition: "To keep someone or something safe.", example: "He will protect the environment.", icon: "🌳" }
+                ],
+                grammar: {
+                    title: "Future with WILL",
+                    explanation: "Use will + base verb for future predictions, decisions, promises, and actions. Will stays the same with every subject.",
+                    colorCodeTitle: "Future with WILL Formula:",
+                    formula: [
+                        { text: "Leo", role: "subject", desc: "Subject" },
+                        { text: "will study", role: "verb", desc: "will + base verb" },
+                        { text: "science in the future.", role: "complement", desc: "Complement / future time" }
+                    ],
+                    examples: [
+                        { subject: "Leo", verb: "will study", complement: "science." },
+                        { subject: "He", verb: "will travel", complement: "to different countries." },
+                        { subject: "Leo", verb: "will help", complement: "his community." },
+                        { subject: "His future", verb: "will be", complement: "exciting." }
+                    ]
+                },
+                comprehension: [
+                    { question: "What will Leo study?", options: ["Science", "Music", "Cooking"], correct: "Science", hint: "Read the second sentence." },
+                    { question: "Why will he study science?", options: ["To understand the universe", "To become a chef", "To play football"], correct: "To understand the universe", hint: "Read the reason after 'because'." },
+                    { question: "What will Leo do in different countries?", options: ["He will meet people", "He will stay alone", "He will sell cars"], correct: "He will meet people", hint: "Read the third sentence." },
+                    { question: "Who will Leo help?", options: ["His community", "Only himself", "No one"], correct: "His community", hint: "Read the fourth sentence." },
+                    { question: "How does Leo think his future will be?", options: ["Exciting", "Boring", "Impossible"], correct: "Exciting", hint: "Read the final words." }
+                ],
+                sentenceBuilder: [
+                    "Leo / will study / science.",
+                    "He / will travel / to different countries.",
+                    "Leo / will meet / new people.",
+                    "He / will help / his community.",
+                    "His future / will be / exciting."
+                ],
+                finalPractice: [
+                    { text: "Leo _____ study science.", gap: "will", choices: ["will", "did", "does"] },
+                    { text: "He will _____ to different countries.", gap: "travel", choices: ["travel", "traveled", "travels"] },
+                    { text: "Leo _____ meet new people.", gap: "will", choices: ["will", "is", "was"] },
+                    { text: "He will _____ his community.", gap: "help", choices: ["help", "helped", "helps"] },
+                    { text: "His future will _____ exciting.", gap: "be", choices: ["be", "is", "was"] }
+                ]
+            }
+        };
+
+        const REGULAR_VERBS = [
+            { pres: "answer", past: "answered", future: "will answer", spanish: "responder", exp: "I answer the question." },
+            { pres: "arrive", past: "arrived", future: "will arrive", spanish: "llegar", exp: "The bus arrived early." },
+            { pres: "ask", past: "asked", future: "will ask", spanish: "preguntar", exp: "She asked a question." },
+            { pres: "call", past: "called", future: "will call", spanish: "llamar", exp: "I will call my friend." },
+            { pres: "clean", past: "cleaned", future: "will clean", spanish: "limpiar", exp: "Daniel cleaned his room." },
+            { pres: "cook", past: "cooked", future: "will cook", spanish: "cocinar", exp: "They cooked lunch." },
+            { pres: "dance", past: "danced", future: "will dance", spanish: "bailar", exp: "We danced at the party." },
+            { pres: "enjoy", past: "enjoyed", future: "will enjoy", spanish: "disfrutar", exp: "He enjoyed the weekend." },
+            { pres: "help", past: "helped", future: "will help", spanish: "ayudar", exp: "Leo will help his community." },
+            { pres: "invite", past: "invited", future: "will invite", spanish: "invitar", exp: "She invited her friends." },
+            { pres: "listen", past: "listened", future: "will listen", spanish: "escuchar", exp: "Mia listens to her teacher." },
+            { pres: "live", past: "lived", future: "will live", spanish: "vivir", exp: "They live in Mexico." },
+            { pres: "look", past: "looked", future: "will look", spanish: "mirar", exp: "Look at the picture." },
+            { pres: "need", past: "needed", future: "will need", spanish: "necesitar", exp: "I need some help." },
+            { pres: "open", past: "opened", future: "will open", spanish: "abrir", exp: "Please open the book." },
+            { pres: "organize", past: "organized", future: "will organize", spanish: "organizar", exp: "He organized his materials." },
+            { pres: "play", past: "played", future: "will play", spanish: "jugar", exp: "They play soccer." },
+            { pres: "practice", past: "practiced", future: "will practice", spanish: "practicar", exp: "We practice English." },
+            { pres: "study", past: "studied", future: "will study", spanish: "estudiar", exp: "Leo will study science." },
+            { pres: "travel", past: "traveled", future: "will travel", spanish: "viajar", exp: "He will travel abroad." },
+            { pres: "visit", past: "visited", future: "will visit", spanish: "visitar", exp: "Daniel visited his grandmother." },
+            { pres: "wait", past: "waited", future: "will wait", spanish: "esperar", exp: "Please wait here." },
+            { pres: "walk", past: "walked", future: "will walk", spanish: "caminar", exp: "Mia walks to school." },
+            { pres: "wash", past: "washed", future: "will wash", spanish: "lavar", exp: "He washed the car." },
+            { pres: "watch", past: "watched", future: "will watch", spanish: "ver / mirar", exp: "They watched a movie." },
+            { pres: "work", past: "worked", future: "will work", spanish: "trabajar", exp: "Leo will work hard." }
+        ];
+
+        const IRREGULAR_VERBS = [
+            { pres: "be", past: "was/were", future: "will be", spanish: "ser / estar", exp: "His future will be exciting." },
+            { pres: "begin", past: "began", future: "will begin", spanish: "empezar", exp: "The class began at nine." },
+            { pres: "break", past: "broke", future: "will break", spanish: "romper", exp: "He broke the glass." },
+            { pres: "bring", past: "brought", future: "will bring", spanish: "traer", exp: "Please bring your notebook." },
+            { pres: "buy", past: "bought", future: "will buy", spanish: "comprar", exp: "She bought some fruit." },
+            { pres: "come", past: "came", future: "will come", spanish: "venir", exp: "Her friends came early." },
+            { pres: "do", past: "did", future: "will do", spanish: "hacer", exp: "Mia does her homework." },
+            { pres: "drink", past: "drank", future: "will drink", spanish: "beber", exp: "They drank cold water." },
+            { pres: "eat", past: "ate", future: "will eat", spanish: "comer", exp: "The family ate sandwiches." },
+            { pres: "feel", past: "felt", future: "will feel", spanish: "sentir", exp: "She felt happy." },
+            { pres: "find", past: "found", future: "will find", spanish: "encontrar", exp: "I found my keys." },
+            { pres: "get", past: "got", future: "will get", spanish: "obtener / llegar", exp: "Mia gets dressed." },
+            { pres: "give", past: "gave", future: "will give", spanish: "dar", exp: "Emma gave food to the animals." },
+            { pres: "go", past: "went", future: "will go", spanish: "ir", exp: "Emma went to the zoo." },
+            { pres: "have", past: "had", future: "will have", spanish: "tener", exp: "Leo has many dreams." },
+            { pres: "know", past: "knew", future: "will know", spanish: "saber / conocer", exp: "I know the answer." },
+            { pres: "make", past: "made", future: "will make", spanish: "hacer / crear", exp: "They made a cake." },
+            { pres: "meet", past: "met", future: "will meet", spanish: "conocer / reunirse", exp: "Leo will meet new people." },
+            { pres: "read", past: "read", future: "will read", spanish: "leer", exp: "Mia reads at night." },
+            { pres: "run", past: "ran", future: "will run", spanish: "correr", exp: "He ran in the park." },
+            { pres: "say", past: "said", future: "will say", spanish: "decir", exp: "She said hello." },
+            { pres: "see", past: "saw", future: "will see", spanish: "ver", exp: "They saw many animals." },
+            { pres: "speak", past: "spoke", future: "will speak", spanish: "hablar", exp: "We speak English in class." },
+            { pres: "take", past: "took", future: "will take", spanish: "tomar / llevar", exp: "Emma took pictures." },
+            { pres: "teach", past: "taught", future: "will teach", spanish: "enseñar", exp: "She teaches English." },
+            { pres: "think", past: "thought", future: "will think", spanish: "pensar", exp: "Think about your answer." },
+            { pres: "understand", past: "understood", future: "will understand", spanish: "entender", exp: "I understand the lesson." },
+            { pres: "write", past: "wrote", future: "will write", spanish: "escribir", exp: "Emma wrote in her notebook." }
+        ];
+
+        const PERSONAL_PRACTICE = {
+            1: {
+                speaking: [
+                    "What time do you usually wake up?",
+                    "What do you do after breakfast?",
+                    "How do you go to school?",
+                    "What do you usually do in the afternoon?",
+                    "Describe your daily routine from morning to night."
+                ],
+                writing: [
+                    "Write 3–5 sentences about your morning routine.",
+                    "Write what you do before and after school.",
+                    "Describe one normal school day.",
+                    "Write about your evening routine.",
+                    "Write 6–8 sentences about your complete daily routine."
+                ],
+                model: "I wake up at 7:00. I eat breakfast, and then I go to school."
+            },
+            2: {
+                speaking: [
+                    "What did you do last Saturday?",
+                    "Did you help at home last weekend? What did you do?",
+                    "What did you eat last weekend?",
+                    "Who did you spend time with?",
+                    "Tell us about your last weekend."
+                ],
+                writing: [
+                    "Write 3–5 sentences about last Saturday.",
+                    "Write about how you helped at home last weekend.",
+                    "Describe a meal you prepared or ate last weekend.",
+                    "Write about a person you visited last weekend.",
+                    "Write 6–8 sentences about your last weekend."
+                ],
+                model: "Last Saturday, I cleaned my room and helped my family."
+            },
+            3: {
+                speaking: [
+                    "When did you last visit a zoo or another interesting place?",
+                    "What animals or interesting things did you see?",
+                    "Did you take pictures? Tell us about them.",
+                    "What was your favorite part of the visit?",
+                    "Tell us about a memorable trip or visit."
+                ],
+                writing: [
+                    "Write 3–5 sentences about a place you visited.",
+                    "Describe the animals or things you saw.",
+                    "Write about pictures you took during a trip.",
+                    "Describe your favorite moment from a visit.",
+                    "Write 6–8 sentences about a memorable trip."
+                ],
+                model: "I went to the zoo. I saw lions and took many pictures."
+            },
+            4: {
+                speaking: [
+                    "What will you do tomorrow?",
+                    "What will you study in the future?",
+                    "Where will you travel one day?",
+                    "What job will you have in the future?",
+                    "Describe your plans and dreams for the future."
+                ],
+                writing: [
+                    "Write 3–5 sentences about tomorrow.",
+                    "Write about what you will study in the future.",
+                    "Describe a place you will visit one day.",
+                    "Write about your future job.",
+                    "Write 6–8 sentences about your future plans and dreams."
+                ],
+                model: "I will study English, and I will travel to another country."
+            }
+        };
+
+        let appState = {
+            fontSize: parseInt(localStorage.getItem('rb_fontSize')) || 22,
+            lineSpacing: parseFloat(localStorage.getItem('rb_lineSpacing')) || 1.8,
+            wordSpacing: parseFloat(localStorage.getItem('rb_wordSpacing')) || 0.18,
+            fontFamily: localStorage.getItem('rb_fontFamily') || 'comic',
+            highContrast: localStorage.getItem('rb_highContrast') === 'true',
+            focusMode: localStorage.getItem('rb_focusMode') === 'true',
+            ttsEnabled: localStorage.getItem('rb_ttsEnabled') !== 'false',
+            ttsSpeed: parseFloat(localStorage.getItem('rb_ttsSpeed')) || 0.95, // Clear, accessible medium pace
+            
+            // Progress tracker per unit
+            progress: JSON.parse(localStorage.getItem('rb_progress')) || {
+                1: { reading: false, vocab: false, grammar: false, comprehension: false, sentence: false, oral: false, final: false, self: false },
+                2: { reading: false, vocab: false, grammar: false, comprehension: false, sentence: false, oral: false, final: false, self: false },
+                3: { reading: false, vocab: false, grammar: false, comprehension: false, sentence: false, oral: false, final: false, self: false },
+                4: { reading: false, vocab: false, grammar: false, comprehension: false, sentence: false, oral: false, final: false, self: false }
+            }
+        };
+
+        // Temporary audio recordings storage (Blobs)
+        let localAudioRecordings = {};
+
+        // Active State variables for currently active Unit and workflow
+        let currentUnitId = 1;
+        let currentSection = 'intro'; // intro, reading, vocab, grammar, comprehension, sentence, oral, final, self
+        
+        // Subsection trackers
+        let currentReadingSentence = 0;
+        let showFullReadingText = false;
+        let currentVocabIndex = 0;
+        let currentCompQuestion = 0;
+        let currentSentencePuzzle = 0;
+        let currentOralQuestion = 0;
+        let currentFinalQuestion = 0;
+        
+        // Build a Sentence State
+        let puzzleSelectedWords = [];
+        let puzzleScrambledWords = [];
+
+        // TTS control
+        let currentUtterance = null;
+
+        function selectVoiceByPreference(synth) {
+            const voices = synth.getVoices();
+            if (!voices || voices.length === 0) return null;
+
+            // Preferred high-quality female US voices
+            const preferredNames = [
+                "google us english female",
+                "microsoft jenny",
+                "microsoft aria",
+                "samantha",
+                "ava",
+                "zira",
+                "female",
+                "en-us"
+            ];
+
+            // 1. First priority: Try to match US English Female specific names
+            for (let name of preferredNames) {
+                const match = voices.find(v => {
+                    const voiceName = v.name.toLowerCase();
+                    const voiceLang = v.lang.toLowerCase();
+                    return voiceName.includes(name) && (voiceLang.includes("en-us") || voiceLang.startsWith("en"));
+                });
+                if (match) return match;
+            }
+
+            // 2. Second priority: Try to match any English female voice
+            const englishVoices = voices.filter(v => v.lang.toLowerCase().startsWith("en"));
+            const femaleKeywordMatch = englishVoices.find(v => v.name.toLowerCase().includes("female") || v.name.toLowerCase().includes("zira") || v.name.toLowerCase().includes("samantha"));
+            if (femaleKeywordMatch) return femaleKeywordMatch;
+
+            // 3. Third priority: Try any English voice
+            if (englishVoices.length > 0) return englishVoices[0];
+
+            // 4. Final fallback: System default
+            return null;
+        }
+
+        function speakText(text) {
+            if (!appState.ttsEnabled) return;
+            
+            // Ensure any ongoing speaking process is stopped cleanly first
+            window.speechSynthesis.cancel();
+            
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = appState.ttsSpeed;
+            
+            // Apply requested female voice configuration if possible
+            const selectedVoice = selectVoiceByPreference(window.speechSynthesis);
+            if (selectedVoice) {
+                utterance.voice = selectedVoice;
+            }
+            
+            // Highlight text if reading section is active
+            utterance.onend = () => {
+                document.querySelectorAll('.sentence-part').forEach(el => el.classList.remove('highlighted-sentence'));
+            };
+
+            currentUtterance = utterance;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // Preload voices (Some browsers load speech engine on demand asynchronously)
+        if (typeof speechSynthesis !== 'undefined' && speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = () => {
+                selectVoiceByPreference(window.speechSynthesis);
+            };
+        }
+
+        function stopSpeaking() {
+            window.speechSynthesis.cancel();
+        }
+
+        function applyAccessibilityStyles() {
+            const root = document.documentElement;
+            
+            // Font Family selection
+            if (appState.fontFamily === 'comic') {
+                root.style.setProperty('--font-main', "'Comic Neue', 'Inter', sans-serif");
+            } else {
+                root.style.setProperty('--font-main', "'Inter', sans-serif");
+            }
+
+            // Sizes & Spaces
+            root.style.setProperty('--text-base-size', `${appState.fontSize}px`);
+            root.style.setProperty('--line-spacing', `${appState.lineSpacing}`);
+            root.style.setProperty('--word-spacing', `${appState.wordSpacing}em`);
+            
+            // High contrast class
+            if (appState.highContrast) {
+                document.body.classList.add('high-contrast');
+            } else {
+                document.body.classList.remove('high-contrast');
+            }
+
+            // Focus Mode class
+            if (appState.focusMode) {
+                document.body.classList.add('focus-mode-active');
+            } else {
+                document.body.classList.remove('focus-mode-active');
+            }
+        }
+
+        function saveSettings() {
+            localStorage.setItem('rb_fontSize', appState.fontSize);
+            localStorage.setItem('rb_lineSpacing', appState.lineSpacing);
+            localStorage.setItem('rb_wordSpacing', appState.wordSpacing);
+            localStorage.setItem('rb_fontFamily', appState.fontFamily);
+            localStorage.setItem('rb_highContrast', appState.highContrast);
+            localStorage.setItem('rb_focusMode', appState.focusMode);
+            localStorage.setItem('rb_ttsEnabled', appState.ttsEnabled);
+            localStorage.setItem('rb_ttsSpeed', appState.ttsSpeed);
+            applyAccessibilityStyles();
+        }
+
+        function routeController() {
+            stopSpeaking();
+            const hash = window.location.hash || '#home';
+            
+            // Deep Link matches (e.g. #unit1, #unit1/oral, etc.)
+            const unitMatch = hash.match(/^#unit([1-4])$/);
+            const oralMatch = hash.match(/^#unit([1-4])\/oral$/);
+
+            if (unitMatch) {
+                currentUnitId = parseInt(unitMatch[1]);
+                currentSection = 'intro';
+                renderUnitView();
+            } else if (oralMatch) {
+                currentUnitId = parseInt(oralMatch[1]);
+                currentSection = 'oral';
+                currentOralQuestion = 0;
+                renderUnitView();
+            } else if (hash === '#home') {
+                renderHome();
+            } else if (hash === '#grammar-summary') {
+                renderGrammarSummary();
+            } else if (hash === '#verb-list') {
+                renderVerbList();
+            } else if (hash === '#vocabulary-bank') {
+                renderVocabularyBank(false);
+            } else if (hash === '#favorite-words') {
+                renderVocabularyBank(true);
+            } else if (hash === '#progress') {
+                renderProgressDashboard();
+            } else if (hash === '#preferences') {
+                renderReadingPreferences();
+            } else if (hash === '#teacher') {
+                renderTeacherInformation();
+            } else {
+                renderHome();
+            }
+            
+            window.scrollTo(0, 0);
+        }
+
+        // Listen for route changes
+        window.addEventListener('hashchange', routeController);
+        window.addEventListener('DOMContentLoaded', () => {
+            applyAccessibilityStyles();
+            routeController();
+        });
+
+        // Helper to mark a unit activity as complete and update localStorage
+        function completeActivity(unitId, activityKey) {
+            appState.progress[unitId][activityKey] = true;
+            localStorage.setItem('rb_progress', JSON.stringify(appState.progress));
+        }
+
+        function renderHome() {
+            const container = document.getElementById('app-container');
+            container.innerHTML = `
+                <div class="text-center py-8 px-4 max-w-2xl mx-auto space-y-8">
+                    <!-- Brand Section -->
+                    <div class="space-y-3">
+                        <span class="text-7xl block mb-2" role="img" aria-label="Bridge emoji">🌉</span>
+                        <h1 class="text-5xl font-extrabold tracking-tight text-slate-900 drop-shadow-sm">ReadBridge</h1>
+                        <p class="text-2xl text-indigo-700 font-bold border-b-4 border-amber-300 pb-3 max-w-md mx-auto">
+                            Your bridge to understanding English
+                        </p>
+                        <p class="text-lg text-slate-600 pt-2 leading-relaxed font-semibold">
+                            A connected learning system designed for A1–A2 learners to read, listen, build sentences, and practice present, past, and future forms.
+                        </p>
+                    </div>
+
+                    <!-- Main Actions -->
+                    <div class="grid grid-cols-1 gap-4 pt-4">
+                        <button onclick="window.location.hash='#unit1'" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-2xl font-bold py-5 px-6 rounded-2xl shadow-md transform hover:scale-[1.01] transition duration-200 flex items-center justify-center gap-3 tap-target">
+                            <i class="fa-solid fa-play text-amber-300"></i> Start Learning (Unit 1)
+                        </button>
+                        
+                        <div class="bg-indigo-50 p-4 rounded-2xl border-2 border-indigo-100">
+                            <h2 class="text-xl font-bold text-slate-800 mb-3"><i class="fa-solid fa-book mr-2"></i>Choose a Unit</h2>
+                            <div class="grid grid-cols-2 gap-3">
+                                <button onclick="window.location.hash='#unit1'" class="bg-white hover:bg-amber-100 border-2 border-indigo-200 font-bold p-3 rounded-xl text-base text-slate-800 tap-target">
+                                    Unit 1: Daily Routines
+                                </button>
+                                <button onclick="window.location.hash='#unit2'" class="bg-white hover:bg-amber-100 border-2 border-indigo-200 font-bold p-3 rounded-xl text-base text-slate-800 tap-target">
+                                    Unit 2: Busy Weekend
+                                </button>
+                                <button onclick="window.location.hash='#unit3'" class="bg-white hover:bg-amber-100 border-2 border-indigo-200 font-bold p-3 rounded-xl text-base text-slate-800 tap-target">
+                                    Unit 3: Zoo Trip
+                                </button>
+                                <button onclick="window.location.hash='#unit4'" class="bg-white hover:bg-amber-100 border-2 border-indigo-200 font-bold p-3 rounded-xl text-base text-slate-800 tap-target">
+                                    Unit 4: Future Dreams
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Navigation shortcuts -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <button onclick="window.location.hash='#progress'" class="bg-amber-400 hover:bg-amber-500 text-slate-900 font-bold p-4 rounded-xl shadow text-base flex items-center justify-center gap-2 tap-target">
+                            <i class="fa-solid fa-star"></i> My Progress
+                        </button>
+                        <button onclick="window.location.hash='#grammar-summary'" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold p-4 rounded-xl shadow text-base flex items-center justify-center gap-2 tap-target">
+                            <i class="fa-solid fa-graduation-cap"></i> Grammar Rules
+                        </button>
+                        <button onclick="window.location.hash='#verb-list'" class="bg-cyan-600 hover:bg-cyan-700 text-white font-bold p-4 rounded-xl shadow text-base flex items-center justify-center gap-2 tap-target">
+                            <i class="fa-solid fa-book"></i> Verb Dictionary
+                        </button>
+                        <button onclick="window.location.hash='#vocabulary-bank'" class="bg-fuchsia-600 hover:bg-fuchsia-700 text-white font-bold p-4 rounded-xl shadow text-base flex items-center justify-center gap-2 tap-target">
+                            <i class="fa-solid fa-language"></i> Vocabulary Bank
+                        </button>
+                        <button onclick="window.location.hash='#favorite-words'" class="bg-rose-500 hover:bg-rose-600 text-white font-bold p-4 rounded-xl shadow text-base flex items-center justify-center gap-2 tap-target">
+                            <i class="fa-solid fa-heart"></i> My Favorite Words
+                        </button>
+                    </div>
+
+                    <!-- Preference feature notice -->
+                    <div class="bg-amber-50 p-4 rounded-xl border border-amber-200 text-left text-sm text-amber-900">
+                        <p class="font-bold mb-1"><i class="fa-solid fa-sliders mr-2"></i>Personalized Learning Active:</p>
+                        <p>No timers. Adjustable text spacing. Color-coded verbs. Voice-input support. Tap-to-arrange interactive grammar.</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderUnitView() {
+            const unit = UNIT_DATA[currentUnitId];
+            const container = document.getElementById('app-container');
+            
+            // Left sidebar / progress tracker for current unit (only visible when not in Focus Mode)
+            let sidebarHtml = `
+                <div class="distraction-element bg-slate-100 p-4 rounded-2xl mb-4 flex flex-wrap gap-2 items-center justify-between">
+                    <span class="font-bold text-slate-700">Unit ${currentUnitId} Steps:</span>
+                    <div class="flex flex-wrap gap-1">
+                        ${renderStepIndicator('intro', 'Intro', 'fa-info')}
+                        ${renderStepIndicator('reading', 'Reading', 'fa-book-open')}
+                        ${renderStepIndicator('vocab', 'Vocabulary', 'fa-spell-check')}
+                        ${renderStepIndicator('grammar', 'Grammar', 'fa-brain')}
+                        ${renderStepIndicator('comprehension', 'Comprehension', 'fa-question')}
+                        ${renderStepIndicator('sentence', 'Sentences', 'fa-puzzle-piece')}
+                        ${renderStepIndicator('oral', 'Oral Practice', 'fa-microphone')}
+                        ${renderStepIndicator('final', 'Final Quiz', 'fa-check-double')}
+                        ${renderStepIndicator('self', 'Self-Rating', 'fa-face-smile')}
+                    </div>
+                </div>
+            `;
+
+            // Back / Next general footer navigation
+            let footerNavHtml = `
+                <div class="mt-8 flex justify-between gap-4 py-4 border-t border-slate-200">
+                    <button onclick="navigateSection('prev')" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-extrabold px-6 py-4 rounded-xl flex items-center gap-2 tap-target">
+                        <i class="fa-solid fa-arrow-left"></i> Back
+                    </button>
+                    <button onclick="navigateSection('next')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold px-6 py-4 rounded-xl flex items-center gap-2 tap-target">
+                        Next <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            `;
+
+            // Active step content assembly
+            let activeStepContent = '';
+            
+            if (currentSection === 'intro') {
+                activeStepContent = renderStepIntro(unit);
+            } else if (currentSection === 'reading') {
+                activeStepContent = renderStepReading(unit);
+            } else if (currentSection === 'vocab') {
+                activeStepContent = renderStepVocab(unit);
+            } else if (currentSection === 'grammar') {
+                activeStepContent = renderStepGrammar(unit);
+            } else if (currentSection === 'comprehension') {
+                activeStepContent = renderStepComprehension(unit);
+            } else if (currentSection === 'sentence') {
+                activeStepContent = renderStepSentenceBuilder(unit);
+            } else if (currentSection === 'oral') {
+                activeStepContent = renderStepOralPractice(unit);
+            } else if (currentSection === 'final') {
+                activeStepContent = renderStepFinalPractice(unit);
+            } else if (currentSection === 'self') {
+                activeStepContent = renderStepSelfAssessment(unit);
+            }
+
+            container.innerHTML = `
+                <div class="space-y-4">
+                    <!-- Unit Header -->
+                    <div class="flex justify-between items-center gap-4 border-b pb-3 distraction-element">
+                        <div>
+                            <span class="text-sm uppercase font-extrabold tracking-widest text-indigo-600">Unit ${currentUnitId}</span>
+                            <h2 class="text-3xl font-bold text-slate-900">${unit.title}</h2>
+                        </div>
+                        <button onclick="window.location.hash='#home'" class="bg-slate-100 hover:bg-slate-200 p-3 rounded-lg text-slate-700 text-sm font-semibold tap-target">
+                            <i class="fa-solid fa-house"></i> Home
+                        </button>
+                    </div>
+
+                    ${sidebarHtml}
+
+                    <!-- Content Card -->
+                    <div class="bg-white border-2 border-slate-100 rounded-3xl p-6 md:p-8 shadow-sm card">
+                        ${activeStepContent}
+                    </div>
+
+                    ${footerNavHtml}
+                </div>
+            `;
+            
+            // Hook up customized actions per subsection on load
+            if (currentSection === 'sentence') {
+                initSentencePuzzle();
+            }
+        }
+
+        function renderStepIndicator(sectionKey, label, icon) {
+            const isActive = currentSection === sectionKey;
+            const isDone = appState.progress[currentUnitId][sectionKey];
+            const visualIcons = {
+                intro: '🏁', reading: '📖', vocab: '🖼️', grammar: '',
+                comprehension: '❓', sentence: '', oral: '🎤', final: '✅', self: '⭐'
+            };
+            let classes = "px-3 py-2 rounded-xl text-xs font-bold flex flex-col items-center justify-center gap-1 min-w-[82px] ";
+            if (isActive) classes += "bg-indigo-600 text-white shadow";
+            else if (isDone) classes += "bg-emerald-100 text-emerald-800 border border-emerald-300";
+            else classes += "bg-slate-200 text-slate-700 border border-slate-300";
+
+            return `
+                <button onclick="currentSection='${sectionKey}'; renderUnitView();" class="${classes} tap-target" title="${label}" aria-label="Open ${label}">
+                    <span class="text-2xl leading-none" aria-hidden="true">${visualIcons[sectionKey] || '📌'}</span>
+                    <span class="leading-tight text-center">${label}</span>
+                    ${isDone && !isActive ? '<i class="fa-solid fa-circle-check text-emerald-600"></i>' : ''}
+                </button>
+            `;
+        }
+
+        function renderStepIntro(unit) {
+            completeActivity(currentUnitId, 'intro');
+            return `
+                <div class="space-y-6 text-center max-w-xl mx-auto py-8">
+                    <span class="text-6xl block">📖</span>
+                    <h3 class="text-4xl font-extrabold text-slate-800">Welcome to Unit ${currentUnitId}</h3>
+                    <p class="text-2xl text-slate-600 font-medium">Topic: <strong class="text-indigo-600">${unit.title}</strong></p>
+                    <div class="bg-indigo-50 p-6 rounded-2xl border-2 border-indigo-100 text-left space-y-3">
+                        <h4 class="text-xl font-bold text-slate-800"><i class="fa-solid fa-bullseye mr-2"></i>What you will learn:</h4>
+                        <ul class="space-y-2 text-lg text-slate-700 list-disc list-inside font-semibold">
+                            <li>Read a short story with guided voice support.</li>
+                            <li>Learn important vocabulary words.</li>
+                            <li>Use the target grammar of this unit correctly.</li>
+                            <li>Answer questions using your actual voice!</li>
+                        </ul>
+                    </div>
+                    <button onclick="navigateSection('next')" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xl font-bold py-4 px-8 rounded-xl shadow-md tap-target">
+                        Let's Begin! <i class="fa-solid fa-chevron-right ml-1"></i>
+                    </button>
+                </div>
+            `;
+        }
+
+        function renderStepReading(unit) {
+            const readingParts = unit.reading;
+            const lineNavigation = showFullReadingText ? '' : `
+                <div class="flex justify-between items-center bg-indigo-50 p-4 rounded-xl gap-4">
+                    <button onclick="prevReadingSentence()" class="bg-white hover:bg-indigo-100 border border-indigo-300 text-indigo-700 p-3 rounded-lg font-bold disabled:opacity-40 tap-target" ${currentReadingSentence === 0 ? 'disabled' : ''}>
+                        <i class="fa-solid fa-chevron-left"></i> Previous Sentence
+                    </button>
+                    <span class="font-extrabold text-indigo-900 text-lg">Sentence ${currentReadingSentence + 1} of ${readingParts.length}</span>
+                    <button onclick="nextReadingSentence()" class="bg-white hover:bg-indigo-100 border border-indigo-300 text-indigo-700 p-3 rounded-lg font-bold disabled:opacity-40 tap-target" ${currentReadingSentence === readingParts.length - 1 ? 'disabled' : ''}>
+                        Next Sentence <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>`;
+
+            const sentenceText = readingParts[currentReadingSentence].replace(/'/g, "\\'");
+            const audioControls = showFullReadingText ? `
+                <div class="flex flex-wrap gap-2 justify-center py-2">
+                    <button onclick="speakFullReading()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-xl font-bold flex items-center gap-2 text-lg tap-target">
+                        <i class="fa-solid fa-play"></i> Listen to Full Story
+                    </button>
+                    <button onclick="pauseReadingAudio()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 px-5 py-3 rounded-xl font-bold flex items-center gap-2 text-lg tap-target">
+                        <i class="fa-solid fa-pause"></i> Pause
+                    </button>
+                    <button onclick="resumeReadingAudio()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-3 rounded-xl font-bold flex items-center gap-2 text-lg tap-target">
+                        <i class="fa-solid fa-play"></i> Resume
+                    </button>
+                    <button onclick="stopSpeaking()" class="bg-red-500 hover:bg-red-600 text-white px-5 py-3 rounded-xl font-bold flex items-center gap-2 text-lg tap-target">
+                        <i class="fa-solid fa-stop"></i> Stop
+                    </button>
+                </div>` : `
+                <div class="flex flex-wrap gap-2 justify-center py-2">
+                    <button onclick="speakText('${sentenceText}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-xl font-bold flex items-center gap-2 text-lg tap-target">
+                        <i class="fa-solid fa-volume-high"></i> Listen to This Sentence
+                    </button>
+                    <button onclick="stopSpeaking()" class="bg-red-500 hover:bg-red-600 text-white px-5 py-3 rounded-xl font-bold flex items-center gap-2 text-lg tap-target">
+                        <i class="fa-solid fa-stop"></i> Stop
+                    </button>
+                </div>`;
+
+            const progressPercentage = ((currentReadingSentence + 1) / readingParts.length) * 100;
+            const progressBar = `<div class="w-full bg-slate-200 h-3 rounded-full overflow-hidden"><div class="bg-indigo-600 h-full transition-all duration-300" style="width: ${progressPercentage}%"></div></div>`;
+            const toggleFullTextBtn = `
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-50 p-3 rounded-2xl border">
+                    <button onclick="setReadingMode(false)" class="${!showFullReadingText ? 'bg-indigo-600 text-white' : 'bg-white text-slate-800'} border-2 border-indigo-200 text-base font-bold py-3 px-4 rounded-xl tap-target"><i class="fa-solid fa-align-left mr-2"></i>Sentence by Sentence</button>
+                    <button onclick="setReadingMode(true)" class="${showFullReadingText ? 'bg-indigo-600 text-white' : 'bg-white text-slate-800'} border-2 border-indigo-200 text-base font-bold py-3 px-4 rounded-xl tap-target"><i class="fa-solid fa-book-open mr-2"></i>Full Story</button>
+                </div>`;
+
+            const displayArea = showFullReadingText ? `
+                <div class="space-y-4 text-left leading-relaxed text-2xl font-medium select-none bg-amber-50/40 p-6 rounded-2xl border border-amber-100">
+                    ${readingParts.map((sentence, idx) => `<span id="full-reading-sentence-${idx}" class="transition duration-150 sentence-part ${idx === currentReadingSentence ? 'highlighted-sentence font-bold' : ''}">${sentence}</span>`).join(' ')}
+                </div>` : `
+                <div class="text-center py-10 px-4 min-h-[160px] flex items-center justify-center">
+                    <p class="text-3xl font-bold text-slate-900 leading-relaxed max-w-xl border-l-4 border-indigo-500 pl-4 text-left">${readingParts[currentReadingSentence]}</p>
+                </div>`;
+
+            return `
+                <div class="space-y-6">
+                    <div class="flex flex-wrap justify-between items-center border-b pb-3 distraction-element">
+                        <h3 class="text-2xl font-bold text-indigo-900"><i class="fa-solid fa-book-open mr-2"></i>Interactive Reading</h3>
+                        <div class="flex items-center gap-2"><button onclick="adjustAppFontSize(1)" class="bg-slate-100 text-slate-800 p-2 rounded hover:bg-slate-200 font-bold tap-target"><i class="fa-solid fa-plus"></i> Size</button><button onclick="adjustAppFontSize(-1)" class="bg-slate-100 text-slate-800 p-2 rounded hover:bg-slate-200 font-bold tap-target"><i class="fa-solid fa-minus"></i> Size</button></div>
+                    </div>
+                    ${toggleFullTextBtn}
+                    ${progressBar}
+                    ${displayArea}
+                    ${audioControls}
+                    ${lineNavigation}
+                </div>`;
+        }
+
+        function toggleReadingMode() {
+            setReadingMode(!showFullReadingText);
+        }
+
+        function setReadingMode(fullMode) {
+            stopSpeaking();
+            showFullReadingText = fullMode;
+            currentReadingSentence = 0;
+            renderUnitView();
+        }
+
+        function pauseReadingAudio() {
+            if (window.speechSynthesis && window.speechSynthesis.speaking) window.speechSynthesis.pause();
+        }
+
+        function resumeReadingAudio() {
+            if (window.speechSynthesis && window.speechSynthesis.paused) window.speechSynthesis.resume();
+        }
+
+        function speakFullReading() {
+            if (!appState.ttsEnabled) return;
+            stopSpeaking();
+            const sentences = UNIT_DATA[currentUnitId].reading;
+            let index = 0;
+
+            function speakNextSentence() {
+                if (index >= sentences.length) {
+                    document.querySelectorAll('.sentence-part').forEach(el => el.classList.remove('highlighted-sentence', 'font-bold'));
+                    completeActivity(currentUnitId, 'reading');
+                    return;
+                }
+                currentReadingSentence = index;
+                document.querySelectorAll('.sentence-part').forEach((el, i) => {
+                    el.classList.toggle('highlighted-sentence', i === index);
+                    el.classList.toggle('font-bold', i === index);
+                });
+                const utterance = new SpeechSynthesisUtterance(sentences[index]);
+                utterance.rate = appState.ttsSpeed;
+                const selectedVoice = selectVoiceByPreference(window.speechSynthesis);
+                if (selectedVoice) utterance.voice = selectedVoice;
+                utterance.onend = () => { index++; speakNextSentence(); };
+                currentUtterance = utterance;
+                window.speechSynthesis.speak(utterance);
+            }
+            speakNextSentence();
+        }
+
+        function selectReadingSentence(index) {
+            currentReadingSentence = index;
+            renderUnitView();
+            const text = UNIT_DATA[currentUnitId].reading[index];
+            speakText(text);
+        }
+
+        function nextReadingSentence() {
+            const readingParts = UNIT_DATA[currentUnitId].reading;
+            if (currentReadingSentence < readingParts.length - 1) {
+                currentReadingSentence++;
+                renderUnitView();
+                speakText(readingParts[currentReadingSentence]);
+            } else {
+                completeActivity(currentUnitId, 'reading');
+            }
+        }
+
+        function prevReadingSentence() {
+            if (currentReadingSentence > 0) {
+                currentReadingSentence--;
+                renderUnitView();
+                speakText(UNIT_DATA[currentUnitId].reading[currentReadingSentence]);
+            }
+        }
+
+        function renderStepVocab(unit) {
+            const vocabList = unit.vocabulary;
+            const currentVocab = vocabList[currentVocabIndex];
+            
+            completeActivity(currentUnitId, 'vocab');
+
+            let cardHtml = `
+                <div class="border-2 border-indigo-100 bg-amber-50/40 rounded-3xl p-6 md:p-8 space-y-6 text-left max-w-lg mx-auto shadow-sm">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="text-6xl block mb-2" role="img">${currentVocab.icon}</span>
+                            <h4 class="text-4xl font-extrabold text-indigo-900 border-b-2 border-indigo-200 pb-2 inline-block">${currentVocab.word}</h4>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="toggleFavoriteWord(${currentUnitId}, '${currentVocab.word.replace(/'/g, "\'")}')" class="bg-rose-100 hover:bg-rose-200 text-2xl p-3 rounded-full shadow tap-target" title="Add to favorites">
+                                ${getFavoriteWords().includes(`${currentUnitId}:${currentVocab.word}`) ? '❤️' : '🤍'}
+                            </button>
+                            <button onclick="speakText('${currentVocab.word}')" class="bg-indigo-600 hover:bg-indigo-700 text-white p-4 rounded-full shadow tap-target" title="Pronounce Word">
+                                <i class="fa-solid fa-volume-high text-xl"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <span class="text-sm font-bold text-slate-500 uppercase tracking-widest block">Significado en Español</span>
+                            <p class="text-2xl font-bold text-emerald-800">${currentVocab.spanish}</p>
+                        </div>
+
+                        <div>
+                            <span class="text-sm font-bold text-slate-500 uppercase tracking-widest block">English Definition</span>
+                            <p class="text-xl text-slate-700 leading-normal font-medium">${currentVocab.definition}</p>
+                        </div>
+
+                        <div class="bg-white p-4 rounded-xl border border-indigo-100">
+                            <span class="text-sm font-bold text-slate-500 uppercase tracking-widest block mb-1">Example Sentence</span>
+                            <p class="text-xl text-slate-800 italic leading-relaxed">"${currentVocab.example}"</p>
+                            <button onclick="speakText('${currentVocab.example.replace(/'/g, "\\'")}')" class="text-indigo-600 text-sm font-bold mt-2 hover:underline flex items-center gap-1 tap-target">
+                                <i class="fa-solid fa-volume-low"></i> Listen Example
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            let navigationHtml = `
+                <div class="flex justify-between items-center max-w-lg mx-auto gap-4 mt-6">
+                    <button onclick="prevVocabWord()" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-4 py-3 rounded-xl disabled:opacity-40 flex items-center gap-1 tap-target" ${currentVocabIndex === 0 ? 'disabled' : ''}>
+                        <i class="fa-solid fa-arrow-left"></i> Prev Word
+                    </button>
+                    <span class="font-bold text-slate-600 text-base">Word ${currentVocabIndex + 1} of ${vocabList.length}</span>
+                    <button onclick="nextVocabWord()" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-4 py-3 rounded-xl disabled:opacity-40 flex items-center gap-1 tap-target" ${currentVocabIndex === vocabList.length - 1 ? 'disabled' : ''}>
+                        Next Word <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            `;
+
+            return `
+                <div class="space-y-6">
+                    <h3 class="text-2xl font-bold text-indigo-900 border-b pb-2 distraction-element"><i class="fa-solid fa-spell-check mr-2"></i>Vocabulary Cards</h3>
+                    <p class="text-lg text-slate-600 distraction-element font-semibold">Review the essential verbs used in this unit's reading.</p>
+                    ${cardHtml}
+                    ${navigationHtml}
+                </div>
+            `;
+        }
+
+        function nextVocabWord() {
+            const vocabList = UNIT_DATA[currentUnitId].vocabulary;
+            if (currentVocabIndex < vocabList.length - 1) {
+                currentVocabIndex++;
+                renderUnitView();
+                speakText(vocabList[currentVocabIndex].word);
+            }
+        }
+
+        function prevVocabWord() {
+            if (currentVocabIndex > 0) {
+                currentVocabIndex--;
+                renderUnitView();
+                speakText(UNIT_DATA[currentUnitId].vocabulary[currentVocabIndex].word);
+            }
+        }
+
+        function renderStepGrammar(unit) {
+            const grammar = unit.grammar;
+            completeActivity(currentUnitId, 'grammar');
+
+            let formulaHtml = `
+                <div class="bg-slate-50 p-6 rounded-2xl border-2 border-indigo-100 space-y-4">
+                    <h4 class="text-lg font-bold text-slate-800 uppercase tracking-widest"><i class="fa-solid fa-wand-magic-sparkles mr-2"></i>Color-Coded Sentence Rule</h4>
+                    <div class="flex flex-wrap items-center justify-center gap-3 py-4 text-center">
+                        ${grammar.formula.map(p => {
+                            let colorClass = "text-slate-800";
+                            if (p.role === 'subject') colorClass = 'token-subject text-2xl';
+                            if (p.role === 'verb') colorClass = 'token-verb text-2xl';
+                            if (p.role === 'complement') colorClass = 'token-complement text-2xl';
+                            return `
+                                <div class="p-3 bg-white border rounded-xl shadow-sm min-w-[120px]">
+                                    <span class="${colorClass}">${p.text}</span>
+                                    <p class="text-xs text-slate-500 mt-1 uppercase font-bold tracking-tight">${p.desc}</p>
+                                </div>
+                            `;
+                        }).join(' ')}
+                    </div>
+                </div>
+            `;
+
+            let timelineHtml = `
+                <div class="bg-indigo-50 p-6 rounded-2xl border border-indigo-100 space-y-3">
+                    <h4 class="text-lg font-bold text-indigo-900 uppercase tracking-widest"><i class="fa-solid fa-timeline mr-2"></i>Time Reference Timeline</h4>
+                    <div class="relative py-8">
+                        <div class="absolute h-1.5 bg-indigo-300 left-0 right-0 top-1/2 -translate-y-1/2 rounded-full"></div>
+                        <div class="flex justify-between items-center relative">
+                            <!-- Past Event -->
+                            <div class="flex flex-col items-center bg-white p-3 rounded-xl border-2 border-emerald-500 shadow-sm relative z-10 -mt-2">
+                                <span class="text-xs font-bold text-emerald-800 uppercase">Past Simple Action</span>
+                                <span class="text-lg font-bold token-verb">Finished Event</span>
+                                <span class="text-xs text-slate-500 italic">"Yesterday / Last Saturday"</span>
+                            </div>
+                            <!-- Present Event -->
+                            <div class="flex flex-col items-center bg-slate-100 p-2 rounded-lg border border-slate-300 shadow-sm relative z-10">
+                                <span class="text-xs font-bold text-slate-500 uppercase">Present</span>
+                                <span class="text-sm font-semibold text-slate-600">Now</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            let examplesHtml = `
+                <div class="space-y-3">
+                    <h4 class="text-xl font-bold text-slate-800"><i class="fa-solid fa-list-ul mr-2"></i>Try Reading These Sentences Aloud:</h4>
+                    <div class="space-y-3">
+                        ${grammar.examples.map((ex, index) => {
+                            const speechStr = `${ex.subject} ${ex.verb} ${ex.complement}`.replace(/'/g, "\\'");
+                            return `
+                                <div class="bg-white hover:bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-wrap items-center justify-between gap-4 transition">
+                                    <div class="text-xl leading-relaxed">
+                                        <span class="token-subject">${ex.subject}</span>
+                                        <span class="token-verb">${ex.verb}</span>
+                                        <span class="token-complement">${ex.complement}</span>
+                                    </div>
+                                    <button onclick="speakText('${speechStr}')" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-800 px-3 py-2 rounded-lg text-sm font-bold flex items-center gap-1.5 tap-target">
+                                        <i class="fa-solid fa-volume-high"></i> Listen
+                                    </button>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+
+            return `
+                <div class="space-y-8 text-left font-medium">
+                    <div class="border-b pb-3 distraction-element">
+                        <h3 class="text-2xl font-bold text-indigo-900"><i class="fa-solid fa-brain mr-2"></i>Grammar Focus: ${grammar.title}</h3>
+                        <p class="text-lg text-slate-600 mt-1">${grammar.explanation}</p>
+                    </div>
+
+                    ${formulaHtml}
+                    ${timelineHtml}
+                    ${examplesHtml}
+                    
+                    <div class="bg-amber-50 p-4 rounded-xl border border-amber-200 text-sm">
+                        <p class="font-bold text-amber-900 mb-1">Visual Color Key:</p>
+                        <div class="flex flex-wrap gap-4 font-bold">
+                            <span class="token-subject">Blue = Subject</span>
+                            <span class="token-verb">Green = Verb</span>
+                            <span class="token-complement">Orange = Complement / Time Expression</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderStepComprehension(unit) {
+            const currentQ = unit.comprehension[currentCompQuestion];
+            completeActivity(currentUnitId, 'comprehension');
+
+            let hintHtml = `
+                <div id="comp-hint-box" class="hidden bg-amber-50 p-4 rounded-xl border border-amber-300 text-slate-700 text-lg font-semibold">
+                    <strong>💡 Keyword Support:</strong> ${currentQ.hint}
+                </div>
+            `;
+
+            let optionsHtml = `
+                <div class="grid grid-cols-1 gap-4">
+                    ${currentQ.options.map(option => `
+                        <button onclick="checkComprehensionAnswer('${option.replace(/'/g, "\\'")}')" class="w-full bg-slate-50 hover:bg-indigo-50 border-2 border-slate-200 hover:border-indigo-400 font-bold p-5 rounded-2xl text-left text-xl text-slate-800 transition tap-target">
+                            ${option}
+                        </button>
+                    `).join('')}
+                </div>
+            `;
+
+            let navigationHtml = `
+                <div class="flex justify-between items-center gap-4 mt-6">
+                    <button onclick="prevComprehensionQuestion()" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-4 py-3 rounded-xl disabled:opacity-40 flex items-center gap-1 tap-target" ${currentCompQuestion === 0 ? 'disabled' : ''}>
+                        <i class="fa-solid fa-arrow-left"></i> Prev Question
+                    </button>
+                    <span class="font-extrabold text-slate-600">Question ${currentCompQuestion + 1} of ${unit.comprehension.length}</span>
+                    <button onclick="nextComprehensionQuestion()" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-4 py-3 rounded-xl disabled:opacity-40 flex items-center gap-1 tap-target" ${currentCompQuestion === unit.comprehension.length - 1 ? 'disabled' : ''}>
+                        Next Question <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            `;
+
+            return `
+                <div class="space-y-6 text-left">
+                    <div class="flex justify-between items-center border-b pb-2 distraction-element">
+                        <h3 class="text-2xl font-bold text-indigo-900"><i class="fa-solid fa-circle-question mr-2"></i>Reading Comprehension</h3>
+                        <button onclick="toggleComprehensionHint()" class="bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold px-3 py-1.5 rounded-lg text-sm tap-target">
+                            <i class="fa-solid fa-lightbulb"></i> Show Keyword Hint
+                        </button>
+                    </div>
+
+                    <!-- Question Block -->
+                    <div class="space-y-4">
+                        <div class="flex items-start gap-3">
+                            <h4 class="text-2xl font-bold text-slate-900">${currentQ.question}</h4>
+                            <button onclick="speakText('${currentQ.question.replace(/'/g, "\\'")}')" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-800 p-2 rounded-lg tap-target" title="Listen to question">
+                                <i class="fa-solid fa-volume-high"></i>
+                            </button>
+                        </div>
+                        
+                        ${hintHtml}
+                        <div id="comprehension-feedback" class="p-4 rounded-xl font-bold hidden text-xl text-center"></div>
+                        
+                        ${optionsHtml}
+                    </div>
+
+                    ${navigationHtml}
+                </div>
+            `;
+        }
+
+        function toggleComprehensionHint() {
+            const hintBox = document.getElementById('comp-hint-box');
+            if (hintBox) hintBox.classList.toggle('hidden');
+        }
+
+        function checkComprehensionAnswer(selected) {
+            const unit = UNIT_DATA[currentUnitId];
+            const currentQ = unit.comprehension[currentCompQuestion];
+            const feedback = document.getElementById('comprehension-feedback');
+            
+            feedback.classList.remove('hidden', 'bg-emerald-100', 'text-emerald-800', 'bg-rose-100', 'text-rose-800');
+            
+            if (selected === currentQ.correct) {
+                feedback.classList.add('bg-emerald-100', 'text-emerald-800');
+                feedback.innerHTML = `<i class="fa-solid fa-circle-check mr-2"></i>Correct! Great Job!`;
+                speakText("Correct!");
+            } else {
+                feedback.classList.add('bg-rose-100', 'text-rose-800');
+                feedback.innerHTML = `<i class="fa-solid fa-circle-xmark mr-2"></i>That is not the correct option. Try again, you can do it!`;
+                speakText("Try again, you can do it!");
+            }
+        }
+
+        function nextComprehensionQuestion() {
+            const unit = UNIT_DATA[currentUnitId];
+            if (currentCompQuestion < unit.comprehension.length - 1) {
+                currentCompQuestion++;
+                renderUnitView();
+            }
+        }
+
+        function prevComprehensionQuestion() {
+            if (currentCompQuestion > 0) {
+                currentCompQuestion--;
+                renderUnitView();
+            }
+        }
+
+        function renderStepSentenceBuilder(unit) {
+            completeActivity(currentUnitId, 'sentence');
+            const targetSentence = unit.sentenceBuilder[currentSentencePuzzle];
+            
+            return `
+                <div class="space-y-6 text-left">
+                    <div class="border-b pb-2 distraction-element flex justify-between items-center">
+                        <div>
+                            <h3 class="text-2xl font-bold text-indigo-900"><i class="fa-solid fa-puzzle-piece mr-2"></i>Build a Sentence</h3>
+                            <p class="text-base text-slate-600 font-semibold">Reorder the cards to make a correct sentence for this unit.</p>
+                        </div>
+                        <span class="font-extrabold text-indigo-950 text-base">Sentence ${currentSentencePuzzle + 1} of ${unit.sentenceBuilder.length}</span>
+                    </div>
+
+                    <!-- Sandbox Sentence Workspace -->
+                    <div class="space-y-4">
+                        <span class="text-sm font-bold text-slate-500 uppercase tracking-widest block">Your Sentence Workspace:</span>
+                        
+                        <!-- Selected Word Cards Area -->
+                        <div id="sentence-target" class="min-h-[90px] border-3 border-dashed border-indigo-200 bg-indigo-50/50 rounded-2xl p-4 flex flex-wrap gap-3 items-center justify-center transition">
+                            <!-- Placed words inject here -->
+                        </div>
+
+                        <!-- Scrambled Word Source Deck -->
+                        <span class="text-sm font-bold text-slate-500 uppercase tracking-widest block pt-2">Tap words below in order:</span>
+                        <div id="sentence-source" class="min-h-[90px] bg-slate-50 border-2 border-slate-100 rounded-2xl p-4 flex flex-wrap gap-3 items-center justify-center">
+                            <!-- Scrambled cards inject here -->
+                        </div>
+                    </div>
+
+                    <!-- Activity Toolbar Controls -->
+                    <div class="flex flex-wrap gap-3 justify-center pt-4">
+                        <button onclick="checkSentencePuzzle()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-lg font-bold px-6 py-3.5 rounded-xl flex items-center gap-2 shadow tap-target">
+                            <i class="fa-solid fa-circle-check"></i> Check Answer
+                        </button>
+                        <button onclick="resetSentencePuzzle()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 text-lg font-bold px-6 py-3.5 rounded-xl flex items-center gap-2 tap-target">
+                            <i class="fa-solid fa-arrow-rotate-right"></i> Reset Card Deck
+                        </button>
+                        <button id="tts-solution-btn" onclick="speakSolutionSentence()" class="bg-teal-600 hover:bg-teal-700 text-white text-lg font-bold px-6 py-3.5 rounded-xl flex items-center gap-2 shadow hidden tap-target">
+                            <i class="fa-solid fa-volume-high"></i> Read Solution
+                        </button>
+                    </div>
+
+                    <!-- Custom Visual Feedback alert boxes -->
+                    <div id="puzzle-feedback" class="p-5 rounded-2xl text-xl font-bold hidden text-center shadow-inner"></div>
+
+                    <!-- Puzzle Pagination Navigation -->
+                    <div class="flex justify-between items-center gap-4 border-t pt-4">
+                        <button onclick="prevSentencePuzzle()" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-4 py-3 rounded-xl disabled:opacity-40 flex items-center gap-1 tap-target" ${currentSentencePuzzle === 0 ? 'disabled' : ''}>
+                            <i class="fa-solid fa-chevron-left"></i> Prev
+                        </button>
+                        <button onclick="nextSentencePuzzle()" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-4 py-3 rounded-xl disabled:opacity-40 flex items-center gap-1 tap-target" ${currentSentencePuzzle === unit.sentenceBuilder.length - 1 ? 'disabled' : ''}>
+                            Next <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function initSentencePuzzle() {
+            const rawSentence = UNIT_DATA[currentUnitId].sentenceBuilder[currentSentencePuzzle];
+            const correctOrder = rawSentence.split('/').map(w => w.trim());
+            
+            puzzleSelectedWords = [];
+            puzzleScrambledWords = [...correctOrder].sort(() => Math.random() - 0.5);
+
+            renderSentenceCards();
+        }
+
+        function renderSentenceCards() {
+            const sourceContainer = document.getElementById('sentence-source');
+            const targetContainer = document.getElementById('sentence-target');
+            if (!sourceContainer || !targetContainer) return;
+
+            if (puzzleSelectedWords.length === 0) {
+                targetContainer.innerHTML = `<span class="text-slate-400 italic text-base font-semibold">Tap card words below to fill workspace...</span>`;
+            } else {
+                targetContainer.innerHTML = puzzleSelectedWords.map((word, idx) => `
+                    <button onclick="tapMoveWord('target', ${idx})" class="bg-indigo-600 text-white text-xl font-bold px-5 py-3 rounded-xl shadow-md border-2 border-indigo-700 hover:bg-rose-500 hover:border-rose-600 transition duration-150 transform active:scale-95 tap-target">
+                        ${word}
+                    </button>
+                `).join('');
+            }
+
+            sourceContainer.innerHTML = puzzleScrambledWords.map((word, idx) => `
+                <button onclick="tapMoveWord('source', ${idx})" class="bg-white text-slate-800 text-xl font-bold px-5 py-3 rounded-xl shadow-md border-2 border-indigo-200 hover:bg-indigo-50 hover:border-indigo-300 transition duration-150 transform active:scale-95 tap-target">
+                    ${word}
+                </button>
+            `).join('');
+        }
+
+        function tapMoveWord(from, index) {
+            if (from === 'source') {
+                const word = puzzleScrambledWords.splice(index, 1)[0];
+                puzzleSelectedWords.push(word);
+            } else {
+                const word = puzzleSelectedWords.splice(index, 1)[0];
+                puzzleScrambledWords.push(word);
+            }
+            renderSentenceCards();
+        }
+
+        function resetSentencePuzzle() {
+            const feedback = document.getElementById('puzzle-feedback');
+            if (feedback) feedback.classList.add('hidden');
+            const listenBtn = document.getElementById('tts-solution-btn');
+            if (listenBtn) listenBtn.classList.add('hidden');
+            initSentencePuzzle();
+        }
+
+        function checkSentencePuzzle() {
+            const rawSentence = UNIT_DATA[currentUnitId].sentenceBuilder[currentSentencePuzzle];
+            const correctCleanSentence = rawSentence.replace(/\//g, '').replace(/\s+/g, ' ').trim();
+            const userSentence = puzzleSelectedWords.join(' ').replace(/\s+/g, ' ').trim();
+
+            const feedback = document.getElementById('puzzle-feedback');
+            const listenBtn = document.getElementById('tts-solution-btn');
+            feedback.classList.remove('hidden', 'bg-emerald-100', 'text-emerald-900', 'bg-amber-100', 'text-amber-900');
+
+            if (userSentence === correctCleanSentence) {
+                feedback.classList.add('bg-emerald-100', 'text-emerald-900');
+                feedback.innerHTML = `🎉 <strong>Great job!</strong> That's exactly correct!`;
+                if (listenBtn) listenBtn.classList.remove('hidden');
+                speakText("Great job!");
+            } else {
+                feedback.classList.add('bg-amber-100', 'text-amber-900');
+                if (puzzleSelectedWords.length === 0) {
+                    feedback.innerHTML = `⚠️ Workspace is empty. Tap on cards below to start!`;
+                } else if (puzzleSelectedWords.length < rawSentence.split('/').length) {
+                    feedback.innerHTML = `🔍 Almost! You need to use all the word cards. Keep going!`;
+                } else {
+                    feedback.innerHTML = `💡 <strong>Check the word order!</strong> Think: <em>Subject</em> (Who) goes first, then the <em>Past Simple Verb</em> (Action), then the <em>Complement</em>. You can do it!`;
+                }
+                speakText("Look at the word order.");
+            }
+        }
+
+        function speakSolutionSentence() {
+            const rawSentence = UNIT_DATA[currentUnitId].sentenceBuilder[currentSentencePuzzle];
+            const correctCleanSentence = rawSentence.replace(/\//g, '').replace(/\s+/g, ' ').trim();
+            speakText(correctCleanSentence);
+        }
+
+        function nextSentencePuzzle() {
+            const unit = UNIT_DATA[currentUnitId];
+            if (currentSentencePuzzle < unit.sentenceBuilder.length - 1) {
+                currentSentencePuzzle++;
+                renderUnitView();
+            }
+        }
+
+        function prevSentencePuzzle() {
+            if (currentSentencePuzzle > 0) {
+                currentSentencePuzzle--;
+                renderUnitView();
+            }
+        }
+
+        function renderStepOralPractice(unit) {
+            completeActivity(currentUnitId, 'oral');
+            const practice = PERSONAL_PRACTICE[currentUnitId];
+            const speakingPrompt = practice.speaking[currentOralQuestion];
+            const writingPrompt = practice.writing[currentOralQuestion];
+            const recordingKey = `u${currentUnitId}_q${currentOralQuestion}`;
+            const hasRecording = !!localAudioRecordings[recordingKey];
+
+            return `
+                <div class="space-y-7 text-left">
+                    <div class="border-b pb-2 distraction-element flex justify-between items-center gap-3">
+                        <div><h3 class="text-2xl font-bold text-indigo-900"><i class="fa-solid fa-comments mr-2"></i>Speaking & Writing</h3><p class="text-base text-slate-600 font-semibold">Talk and write about your own life. These are not reading-comprehension questions.</p></div>
+                        <span class="font-extrabold text-slate-600 text-base">Task ${currentOralQuestion + 1} of ${practice.speaking.length}</span>
+                    </div>
+
+                    <section class="bg-indigo-50/60 border-2 border-indigo-100 p-6 rounded-3xl space-y-5">
+                        <div><span class="text-sm font-bold text-indigo-800 uppercase tracking-widest block">🎤 Speaking Challenge</span><div class="flex items-start gap-3 mt-2"><h4 class="text-2xl font-extrabold text-slate-900">${speakingPrompt}</h4><button onclick="speakText('${speakingPrompt.replace(/'/g, "\\'")}')" class="bg-indigo-600 text-white p-3 rounded-full hover:bg-indigo-700 tap-target"><i class="fa-solid fa-volume-high"></i></button></div></div>
+                        <div class="flex flex-col items-center justify-center bg-white border border-indigo-100 p-6 rounded-2xl gap-4">
+                            <span id="recording-status" class="text-lg font-bold text-slate-500 animate-pulse hidden">🔴 Recording... Speak now!</span>
+                            <div class="flex flex-wrap gap-3 justify-center"><button id="start-rec-btn" onclick="startMicRecording('${recordingKey}')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-lg font-bold px-6 py-4 rounded-xl flex items-center gap-2 shadow-md tap-target"><i class="fa-solid fa-microphone"></i> Start Recording</button><button id="stop-rec-btn" onclick="stopMicRecording('${recordingKey}')" class="bg-rose-600 hover:bg-rose-700 text-white text-lg font-bold px-6 py-4 rounded-xl flex items-center gap-2 shadow-md hidden tap-target"><i class="fa-solid fa-circle-stop"></i> Stop & Listen</button></div>
+                            <div id="transcription-container" class="w-full bg-slate-50 border rounded-xl p-4 min-h-[80px] text-lg text-slate-700 italic text-center hidden"><span class="text-xs uppercase tracking-widest font-bold text-slate-400 block not-italic mb-2">Your Spoken Words</span><p id="transcription-text">Your transcription will appear here.</p></div>
+                            <div id="audio-playback-section" class="w-full flex flex-col items-center gap-2 pt-2 border-t ${hasRecording ? '' : 'hidden'}"><span class="text-sm font-bold text-emerald-800"><i class="fa-solid fa-check"></i> Recording captured!</span><button onclick="playCapturedAudio('${recordingKey}')" class="bg-teal-600 hover:bg-teal-700 text-white text-lg font-bold px-5 py-3 rounded-xl tap-target"><i class="fa-solid fa-play mr-2"></i>Play My Answer</button><button onclick="deleteCapturedAudio('${recordingKey}')" class="text-rose-600 text-sm hover:underline tap-target"><i class="fa-solid fa-trash-can"></i> Record Again</button></div>
+                        </div>
+                        <div id="oral-feedback-box" class="hidden p-5 rounded-2xl border text-lg font-bold"></div>
+                    </section>
+
+                    <section class="bg-amber-50/60 border-2 border-amber-200 p-6 rounded-3xl space-y-4">
+                        <div><span class="text-sm font-bold text-amber-900 uppercase tracking-widest block">✍️ Writing Challenge</span><h4 class="text-2xl font-extrabold text-slate-900 mt-2">${writingPrompt}</h4></div>
+                        <textarea id="oral-written-answer" placeholder="Write about yourself here..." class="w-full bg-white border-2 border-amber-200 rounded-xl p-4 text-lg text-slate-800 outline-none focus:border-amber-400 transition" rows="5"></textarea>
+                        <button onclick="evaluateOralAnswer()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-6 py-3 rounded-xl tap-target"><i class="fa-solid fa-comment-dots mr-2"></i>Get Writing Feedback</button>
+                        <div id="oral-writing-feedback" class="hidden p-4 rounded-xl border text-lg font-bold"></div>
+                    </section>
+
+                    <div class="bg-slate-50 border p-4 rounded-xl text-base"><strong>Helpful model:</strong> <em>${practice.model}</em></div>
+                    <div class="flex justify-between items-center gap-4 border-t pt-4"><button onclick="prevOralQuestion()" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-4 py-3 rounded-xl disabled:opacity-40 tap-target" ${currentOralQuestion === 0 ? 'disabled' : ''}><i class="fa-solid fa-chevron-left"></i> Prev</button><button onclick="nextOralQuestion()" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-4 py-3 rounded-xl disabled:opacity-40 tap-target" ${currentOralQuestion === practice.speaking.length - 1 ? 'disabled' : ''}>Next <i class="fa-solid fa-chevron-right"></i></button></div>
+                </div>`;
+        }
+
+        function startMicRecording(key) {
+            const startBtn = document.getElementById('start-rec-btn');
+            const stopBtn = document.getElementById('stop-rec-btn');
+            const statusLabel = document.getElementById('recording-status');
+            const transcriptionContainer = document.getElementById('transcription-container');
+            const transcriptionText = document.getElementById('transcription-text');
+
+            if (startBtn) startBtn.classList.add('hidden');
+            if (stopBtn) stopBtn.classList.remove('hidden');
+            if (statusLabel) statusLabel.classList.remove('hidden');
+
+            audioChunks = [];
+
+            // Native Audio Capture via MediaRecorder API
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    mediaRecorder = new MediaRecorder(stream);
+                    mediaRecorder.ondataavailable = event => {
+                        audioChunks.push(event.data);
+                    };
+                    mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                        const audioUrl = URL.createObjectURL(audioBlob);
+                        localAudioRecordings[key] = audioUrl;
+                        
+                        const playbackSec = document.getElementById('audio-playback-section');
+                        if (playbackSec) playbackSec.classList.remove('hidden');
+                    };
+                    mediaRecorder.start();
+                })
+                .catch(err => {
+                    console.warn("Microphone access denied or unavailable: ", err);
+                    alert("Microphone permission was denied. Try giving permission, or use the written fallback input box below.");
+                    if (startBtn) startBtn.classList.remove('hidden');
+                    if (stopBtn) stopBtn.classList.add('hidden');
+                    if (statusLabel) statusLabel.classList.add('hidden');
+                });
+
+            // Speech recognition API integration (supported by active browser, Chrome/Safari)
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (SpeechRecognition) {
+                speechRecognizer = new SpeechRecognition();
+                speechRecognizer.continuous = false;
+                speechRecognizer.lang = 'en-US';
+                speechRecognizer.interimResults = false;
+
+                if (transcriptionContainer) transcriptionContainer.classList.remove('hidden');
+                if (transcriptionText) transcriptionText.textContent = "Listening to your spoken sentence...";
+
+                speechRecognizer.onresult = event => {
+                    const speechToTextStr = event.results[0][0].transcript;
+                    if (transcriptionText) transcriptionText.innerHTML = `<strong>"${speechToTextStr}"</strong>`;
+                    
+                    const feedbackBox = document.getElementById('oral-feedback-box');
+                    if (feedbackBox) feedbackBox.classList.remove('hidden');
+                    evaluateOralAnswer(speechToTextStr);
+                };
+
+                speechRecognizer.onerror = err => {
+                    console.log("Speech recognizer error:", err);
+                    if (transcriptionText) transcriptionText.textContent = "Spoken text processed. Review recording with teacher.";
+                };
+
+                speechRecognizer.start();
+            } else {
+                if (transcriptionContainer) {
+                    transcriptionContainer.classList.remove('hidden');
+                    transcriptionText.innerHTML = `<span class="text-amber-800 font-bold"><i class="fa-solid fa-triangle-exclamation"></i> Instant Speech-to-Text transcription is not supported in this browser.</span><br>But don't worry, your recorded audio will play back correctly!`;
+                }
+            }
+        }
+
+        function stopMicRecording(key) {
+            const startBtn = document.getElementById('start-rec-btn');
+            const stopBtn = document.getElementById('stop-rec-btn');
+            const statusLabel = document.getElementById('recording-status');
+
+            if (startBtn) startBtn.classList.remove('hidden');
+            if (stopBtn) stopBtn.classList.add('hidden');
+            if (statusLabel) statusLabel.classList.add('hidden');
+
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+                mediaRecorder.stream.getTracks().forEach(track => track.stop());
+            }
+
+            if (speechRecognizer) {
+                speechRecognizer.stop();
+            }
+        }
+
+        function playCapturedAudio(key) {
+            const audioUrl = localAudioRecordings[key];
+            if (audioUrl) {
+                const playSound = new Audio(audioUrl);
+                playSound.play();
+            }
+        }
+
+        function deleteCapturedAudio(key) {
+            if (localAudioRecordings[key]) {
+                delete localAudioRecordings[key];
+            }
+            renderUnitView();
+        }
+
+        function evaluateOralAnswer(spokenText = null) {
+            const typed = document.getElementById('oral-written-answer');
+            const answer = (spokenText || (typed ? typed.value : '')).trim();
+            const box = spokenText ? document.getElementById('oral-feedback-box') : document.getElementById('oral-writing-feedback');
+            if (!box) return;
+            box.classList.remove('hidden', 'bg-rose-50', 'text-rose-800', 'border-rose-200', 'bg-emerald-50', 'text-emerald-900', 'border-emerald-200', 'bg-amber-50', 'text-amber-900', 'border-amber-200');
+            if (!answer) {
+                box.classList.add('bg-amber-50', 'text-amber-900', 'border-amber-200');
+                box.innerHTML = '<i class="fa-solid fa-lightbulb mr-2"></i>Answer first. One complete sentence is a good start.';
+                return;
+            }
+            const normalized = answer.toLowerCase().replace(/[^a-z0-9\s']/g, ' ');
+            const words = normalized.split(/\s+/).filter(Boolean);
+            let usesTarget = false;
+            let specificTip = '';
+            if (currentUnitId === 1) {
+                usesTarget = /\b(i|you|we|they|he|she|it)\b/.test(normalized) && /\b(wake|eat|go|study|play|do|have|walk|watch|read|sleep|wakes|eats|goes|studies|plays|does|has|walks|watches|reads|sleeps)\b/.test(normalized);
+                specificTip = 'Use the Simple Present. Remember: he, she, and it usually take -s or -es.';
+            } else if (currentUnitId === 2) {
+                usesTarget = /\b\w+ed\b/.test(normalized) || /\b(was|were)\b/.test(normalized);
+                specificTip = 'Use regular Past Simple verbs ending in -ed.';
+            } else if (currentUnitId === 3) {
+                usesTarget = /\b(went|saw|took|ate|had|made|came|felt|bought|was|were)\b/.test(normalized);
+                specificTip = 'Use an irregular Past Simple verb, such as went, saw, took, or ate.';
+            } else {
+                usesTarget = /\bwill\s+[a-z]+\b/.test(normalized);
+                specificTip = 'Use will + base verb. The verb does not change after will.';
+            }
+            if (words.length >= 8 && usesTarget) {
+                box.classList.add('bg-emerald-50', 'text-emerald-900', 'border-emerald-200');
+                box.innerHTML = `<i class="fa-solid fa-star mr-2"></i>${spokenText ? 'Excellent speaking!' : 'Excellent sentence!'} You used the target grammar and added useful details.`;
+            } else if (usesTarget) {
+                box.classList.add('bg-emerald-50', 'text-emerald-900', 'border-emerald-200');
+                box.innerHTML = `<i class="fa-solid fa-circle-check mr-2"></i>Great job! Your grammar matches this unit. Try adding one more detail.`;
+            } else if (words.length >= 5) {
+                box.classList.add('bg-amber-50', 'text-amber-900', 'border-amber-200');
+                box.innerHTML = `<i class="fa-solid fa-thumbs-up mr-2"></i>Your idea is clear. ${specificTip}`;
+            } else {
+                box.classList.add('bg-rose-50', 'text-rose-800', 'border-rose-200');
+                box.innerHTML = `<i class="fa-solid fa-seedling mr-2"></i>Good start. Add more details and use a complete sentence. ${specificTip}`;
+            }
+        }
+
+        function nextOralQuestion() {
+            const total = PERSONAL_PRACTICE[currentUnitId].speaking.length;
+            if (currentOralQuestion < total - 1) {
+                currentOralQuestion++;
+                renderUnitView();
+            }
+        }
+
+        function prevOralQuestion() {
+            if (currentOralQuestion > 0) {
+                currentOralQuestion--;
+                renderUnitView();
+            }
+        }
+
+        function renderStepFinalPractice(unit) {
+            completeActivity(currentUnitId, 'final');
+            const questionList = unit.finalPractice;
+            const currentQ = questionList[currentFinalQuestion];
+
+            let sentenceWithBlank = currentQ.text.replace('_____', `<span class="inline-block px-4 py-2 border-2 border-indigo-300 bg-indigo-50/50 rounded-xl font-extrabold text-indigo-900 min-w-[120px] text-center" id="active-blank-box">_______</span>`);
+
+            let choicesHtml = `
+                <div class="flex flex-wrap gap-4 justify-center">
+                    ${currentQ.choices.map(choice => `
+                        <button onclick="fillFinalBlankChoice('${choice}')" class="bg-white hover:bg-amber-100 border-2 border-slate-300 hover:border-amber-400 font-extrabold px-6 py-4 rounded-xl text-lg text-slate-800 transition shadow-sm tap-target">
+                            ${choice}
+                        </button>
+                    `).join('')}
+                </div>
+            `;
+
+            let navigationHtml = `
+                <div class="flex justify-between items-center gap-4 mt-8 border-t pt-4">
+                    <button onclick="prevFinalQuestion()" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-4 py-3 rounded-xl disabled:opacity-40 flex items-center gap-1 tap-target" ${currentFinalQuestion === 0 ? 'disabled' : ''}>
+                        <i class="fa-solid fa-chevron-left"></i> Prev
+                    </button>
+                    <span class="font-extrabold text-slate-600 font-semibold">Task ${currentFinalQuestion + 1} of ${questionList.length}</span>
+                    <button onclick="nextFinalQuestion()" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-4 py-3 rounded-xl disabled:opacity-40 flex items-center gap-1 tap-target" ${currentFinalQuestion === questionList.length - 1 ? 'disabled' : ''}>
+                        Next <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
+            `;
+
+            return `
+                <div class="space-y-6 text-left font-semibold">
+                    <div class="border-b pb-2 distraction-element flex justify-between items-center">
+                        <div>
+                            <h3 class="text-2xl font-bold text-indigo-900"><i class="fa-solid fa-circle-check-double mr-2"></i>Final Practice Quiz</h3>
+                            <p class="text-base text-slate-600">Choose the correct past simple verb option to fill in the missing word gap.</p>
+                        </div>
+                    </div>
+
+                    <!-- Sentence Prompt Area -->
+                    <div class="space-y-6 py-4">
+                        <div class="flex flex-wrap items-center gap-3 bg-indigo-50/20 p-6 rounded-2xl border border-indigo-100 justify-center">
+                            <span class="text-2xl leading-loose font-bold text-slate-900 text-center">
+                                ${sentenceWithBlank}
+                            </span>
+                            <button onclick="speakText('${currentQ.text.replace('_____', currentQ.gap).replace(/'/g, "\\'")}')" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-800 p-3 rounded-full tap-target" title="Listen Sentence Solution">
+                                <i class="fa-solid fa-volume-high"></i>
+                            </button>
+                        </div>
+
+                        <!-- Feedback Box -->
+                        <div id="final-practice-feedback" class="p-4 rounded-xl text-xl font-bold hidden text-center shadow-inner"></div>
+
+                        <!-- Choices block -->
+                        <div class="space-y-3">
+                            <span class="text-sm font-bold text-slate-500 uppercase tracking-widest block text-center">Tap the best choice to fill the sentence:</span>
+                            ${choicesHtml}
+                        </div>
+                    </div>
+
+                    ${navigationHtml}
+                </div>
+            `;
+        }
+
+        function fillFinalBlankChoice(choice) {
+            const unit = UNIT_DATA[currentUnitId];
+            const currentQ = unit.finalPractice[currentFinalQuestion];
+            const blankBox = document.getElementById('active-blank-box');
+            const feedback = document.getElementById('final-practice-feedback');
+
+            if (blankBox) {
+                blankBox.textContent = choice;
+            }
+
+            feedback.classList.remove('hidden', 'bg-emerald-100', 'text-emerald-900', 'bg-rose-100', 'text-rose-900');
+
+            if (choice === currentQ.gap) {
+                feedback.classList.add('bg-emerald-100', 'text-emerald-900');
+                feedback.innerHTML = `<i class="fa-solid fa-circle-check mr-2"></i><strong>Perfect!</strong> "${choice}" is correct!`;
+                speakText("Perfect!");
+            } else {
+                feedback.classList.add('bg-rose-100', 'text-rose-900');
+                feedback.innerHTML = `<i class="fa-solid fa-circle-xmark mr-2"></i><strong>Not quite.</strong> Think about the past simple form. Try again!`;
+                speakText("Try again!");
+            }
+        }
+
+        function nextFinalQuestion() {
+            const unit = UNIT_DATA[currentUnitId];
+            if (currentFinalQuestion < unit.finalPractice.length - 1) {
+                currentFinalQuestion++;
+                renderUnitView();
+            }
+        }
+
+        function prevFinalQuestion() {
+            if (currentFinalQuestion > 0) {
+                currentFinalQuestion--;
+                renderUnitView();
+            }
+        }
+
+        function renderStepSelfAssessment(unit) {
+            completeActivity(currentUnitId, 'self');
+
+            return `
+                <div class="space-y-8 text-center max-w-xl mx-auto py-4 font-semibold">
+                    <div class="border-b pb-2 distraction-element">
+                        <h3 class="text-3xl font-extrabold text-indigo-900">Unit Completed!</h3>
+                        <p class="text-base text-slate-600 font-semibold">Great job completing the active sections. How do you feel about your learning?</p>
+                    </div>
+
+                    <!-- Smileys Rating Matrix -->
+                    <div class="space-y-6">
+                        <!-- Stat 1 -->
+                        <div class="bg-indigo-50/50 p-4 rounded-2xl border space-y-2">
+                            <span class="text-lg font-bold text-slate-800 block">I understand the reading:</span>
+                            <div class="flex justify-center gap-6">
+                                <button onclick="selectRating(this)" class="text-5xl opacity-50 hover:opacity-100 transition transform hover:scale-110 p-2 tap-target" title="Confident"><span role="img">🟢😊</span></button>
+                                <button onclick="selectRating(this)" class="text-5xl opacity-50 hover:opacity-100 transition transform hover:scale-110 p-2 tap-target" title="Neutral"><span role="img">🟡😐</span></button>
+                                <button onclick="selectRating(this)" class="text-5xl opacity-50 hover:opacity-100 transition transform hover:scale-110 p-2 tap-target" title="Unsure"><span role="img">🔴😟</span></button>
+                            </div>
+                        </div>
+
+                        <!-- Stat 2 -->
+                        <div class="bg-indigo-50/50 p-4 rounded-2xl border space-y-2">
+                            <span class="text-lg font-bold text-slate-800 block">I understand the grammar rules:</span>
+                            <div class="flex justify-center gap-6">
+                                <button onclick="selectRating(this)" class="text-5xl opacity-50 hover:opacity-100 transition transform hover:scale-110 p-2 tap-target" title="Confident"><span role="img">🟢😊</span></button>
+                                <button onclick="selectRating(this)" class="text-5xl opacity-50 hover:opacity-100 transition transform hover:scale-110 p-2 tap-target" title="Neutral"><span role="img">🟡😐</span></button>
+                                <button onclick="selectRating(this)" class="text-5xl opacity-50 hover:opacity-100 transition transform hover:scale-110 p-2 tap-target" title="Unsure"><span role="img">🔴😟</span></button>
+                            </div>
+                        </div>
+
+                        <!-- Stat 3 -->
+                        <div class="bg-indigo-50/50 p-4 rounded-2xl border space-y-2">
+                            <span class="text-lg font-bold text-slate-800 block">I can use the new words:</span>
+                            <div class="flex justify-center gap-6">
+                                <button onclick="selectRating(this)" class="text-5xl opacity-50 hover:opacity-100 transition transform hover:scale-110 p-2 tap-target" title="Confident"><span role="img">🟢😊</span></button>
+                                <button onclick="selectRating(this)" class="text-5xl opacity-50 hover:opacity-100 transition transform hover:scale-110 p-2 tap-target" title="Neutral"><span role="img">🟡😐</span></button>
+                                <button onclick="selectRating(this)" class="text-5xl opacity-50 hover:opacity-100 transition transform hover:scale-110 p-2 tap-target" title="Unsure"><span role="img">🔴😟</span></button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Open feedback helper -->
+                    <div class="bg-amber-50 p-6 rounded-2xl border border-amber-200 text-left space-y-3">
+                        <span class="text-lg font-bold text-amber-900 block"><i class="fa-solid fa-comment-dots mr-2"></i>What helped you today?</span>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                            <button onclick="selectFeedbackIcon(this)" class="bg-white border hover:bg-amber-100 p-3 rounded-xl font-bold flex items-center justify-center gap-2 text-sm tap-target">
+                                🔊 Sound Audio
+                            </button>
+                            <button onclick="selectFeedbackIcon(this)" class="bg-white border hover:bg-amber-100 p-3 rounded-xl font-bold flex items-center justify-center gap-2 text-sm tap-target">
+                                🎨 Colored Words
+                            </button>
+                            <button onclick="selectFeedbackIcon(this)" class="bg-white border hover:bg-amber-100 p-3 rounded-xl font-bold flex items-center justify-center gap-2 text-sm tap-target">
+                                🧩 Card Builder
+                            </button>
+                        </div>
+                        <textarea placeholder="Write or record anything else that made learning easy today..." class="w-full bg-white border rounded-xl p-3 text-lg" rows="2"></textarea>
+                    </div>
+
+                    <!-- Finish unit action -->
+                    <div class="pt-4">
+                        <button onclick="window.location.hash='#progress'" class="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-2xl py-4 px-10 rounded-2xl shadow-md transition transform hover:scale-[1.02] tap-target">
+                            <i class="fa-solid fa-star text-yellow-300 mr-2"></i> Save Progress & View Dashboard
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function selectRating(button) {
+            const parent = button.parentElement;
+            parent.querySelectorAll('button').forEach(btn => btn.classList.add('opacity-50'));
+            button.classList.remove('opacity-50');
+            speakText("Thank you for your rating!");
+        }
+
+        function selectFeedbackIcon(button) {
+            button.classList.toggle('bg-amber-200');
+            button.classList.toggle('border-amber-400');
+        }
+
+        function navigateSection(direction) {
+            const stepsOrder = ['intro', 'reading', 'vocab', 'grammar', 'comprehension', 'sentence', 'oral', 'final', 'self'];
+            let currentIdx = stepsOrder.indexOf(currentSection);
+
+            if (direction === 'next') {
+                if (currentIdx < stepsOrder.length - 1) {
+                    currentSection = stepsOrder[currentIdx + 1];
+                    // Reset subsection indexes
+                    currentReadingSentence = 0;
+                    currentVocabIndex = 0;
+                    currentCompQuestion = 0;
+                    currentSentencePuzzle = 0;
+                    currentOralQuestion = 0;
+                    currentFinalQuestion = 0;
+                    renderUnitView();
+                } else {
+                    window.location.hash = '#progress';
+                }
+            } else {
+                if (currentIdx > 0) {
+                    currentSection = stepsOrder[currentIdx - 1];
+                    renderUnitView();
+                } else {
+                    window.location.hash = '#home';
+                }
+            }
+        }
+
+        function renderGrammarSummary() {
+            const container = document.getElementById('app-container');
+            const topics = [
+                { title: '1. Simple Present', use: 'Routines, habits, and actions that happen regularly.', parts: [['Subject','subject'],['Base verb','verb'],['Complement','complement']], note: 'Important: With he, she, and it, add -s or -es to the verb.', example: ['Mia','walks','to school every day.'] },
+                { title: '2. Past Simple — Regular Verbs', use: 'Completed actions in the past.', parts: [['Subject','subject'],['Regular verb + -ed','verb'],['Complement','complement']], note: 'Important: Most regular verbs add -ed. Some spelling rules may change the ending.', example: ['Daniel','cleaned','his bedroom last Saturday.'] },
+                { title: '3. Past Simple — Irregular Verbs', use: 'Completed past actions with verbs that change form.', parts: [['Subject','subject'],['Irregular past verb','verb'],['Complement','complement']], note: 'Important: Irregular verbs do not use -ed. Learn their special past forms.', example: ['Emma','went','to the zoo last Sunday.'] },
+                { title: '4. Future with WILL', use: 'Future predictions, decisions, promises, and plans.', parts: [['Subject','subject'],['will + base verb','verb'],['Complement','complement']], note: 'Important: After will, always use the base form. The verb does not change.', example: ['Leo','will study','science in the future.'] }
+            ];
+            const roleClass = role => role === 'subject' ? 'token-subject' : role === 'verb' ? 'token-verb' : 'token-complement';
+            container.innerHTML = `
+                <div class="space-y-6 text-left font-semibold">
+                    <div class="flex justify-between items-center border-b pb-3 distraction-element"><div><span class="text-sm uppercase font-extrabold tracking-widest text-indigo-600">Grammar Rules Book</span><h2 class="text-3xl font-bold text-slate-900">Grammar Summary</h2></div><button onclick="window.location.hash='#home'" class="bg-slate-100 hover:bg-slate-200 p-3 rounded-lg text-slate-700 text-sm font-semibold tap-target"><i class="fa-solid fa-house"></i> Home</button></div>
+                    <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl"><strong>Color key:</strong> <span class="token-subject">Blue = Subject</span> · <span class="token-verb">Green = Verb</span> · <span class="token-complement">Orange = Complement</span></div>
+                    ${topics.map(t => `<div class="bg-white border rounded-2xl p-6 space-y-4 shadow-sm">
+                        <h3 class="text-2xl font-bold text-indigo-900 border-b pb-2">${t.title}</h3>
+                        <p><strong>What is it used for?</strong> ${t.use}</p>
+                        <div><p class="font-extrabold mb-2">Structure:</p><div class="flex flex-wrap items-center justify-center gap-3 bg-slate-50 p-5 border rounded-2xl text-xl">${t.parts.map((p,i) => `${i ? '<span class="font-bold text-slate-500">+</span>' : ''}<span class="${roleClass(p[1])} bg-white border px-4 py-3 rounded-xl shadow-sm">${p[0]}</span>`).join('')}</div></div>
+                        <div class="bg-amber-50 border-l-4 border-amber-400 p-4 rounded-xl"><strong>⭐ ${t.note}</strong></div>
+                        <div><p class="font-extrabold mb-2">Example:</p><p class="text-xl bg-slate-50 p-4 border rounded-xl"><span class="token-subject">${t.example[0]}</span> <span class="token-verb">${t.example[1]}</span> <span class="token-complement">${t.example[2]}</span></p></div>
+                    </div>`).join('')}
+                </div>`;
+        }
+
+        function renderVerbList() {
+            const container = document.getElementById('app-container');
+            container.innerHTML = `
+                <div class="space-y-6 text-left font-semibold">
+                    <div class="flex justify-between items-center border-b pb-3 distraction-element">
+                        <div>
+                            <span class="text-sm uppercase font-extrabold tracking-widest text-indigo-600">Vocabulary Deck</span>
+                            <h2 class="text-3xl font-bold text-slate-900">Common Verb Dictionary</h2>
+                        </div>
+                        <button onclick="window.location.hash='#home'" class="bg-slate-100 hover:bg-slate-200 p-3 rounded-lg text-slate-700 text-sm font-semibold tap-target">
+                            <i class="fa-solid fa-house"></i> Home
+                        </button>
+                    </div>
+
+                    <!-- Search Input Box -->
+                    <div class="bg-indigo-50 p-4 rounded-2xl border">
+                        <label for="verb-search" class="text-sm font-bold text-indigo-950 uppercase block mb-1">Search by base form, past form, future form, or Spanish meaning:</label>
+                        <input type="text" id="verb-search" oninput="filterVerbList()" placeholder="e.g. study, went, will travel, escribir..." class="w-full bg-white border-2 border-indigo-200 p-4 rounded-xl text-lg font-bold outline-none focus:border-indigo-400">
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Regular Verbs Box -->
+                        <div class="bg-white border rounded-2xl p-6 shadow-sm">
+                            <h3 class="text-2xl font-bold text-emerald-800 border-b-2 border-emerald-100 pb-2 mb-4"><i class="fa-solid fa-circle-check"></i> Regular Verbs (-ed)</h3>
+                            <div class="space-y-4" id="regular-verbs-holder">
+                                ${renderVerbCardList(REGULAR_VERBS)}
+                            </div>
+                        </div>
+
+                        <!-- Irregular Verbs Box -->
+                        <div class="bg-white border rounded-2xl p-6 shadow-sm">
+                            <h3 class="text-2xl font-bold text-amber-800 border-b-2 border-amber-100 pb-2 mb-4"><i class="fa-solid fa-circle-exclamation"></i> Irregular Verbs (Changes)</h3>
+                            <div class="space-y-4" id="irregular-verbs-holder">
+                                ${renderVerbCardList(IRREGULAR_VERBS)}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderVerbCardList(verbs) {
+            return verbs.map(v => `
+                <div class="bg-slate-50 hover:bg-indigo-50/50 p-4 rounded-xl border border-slate-200 space-y-2 verb-card-item transition" data-search="${v.pres} ${v.past} ${v.future} ${v.spanish}">
+                    <div class="flex justify-between items-start gap-3">
+                        <div>
+                            <p class="text-xl font-bold"><span class="text-indigo-700">${v.pres}</span> → <span class="text-emerald-700">${v.past}</span></p>
+                            <p class="text-base"><strong>Future:</strong> ${v.future}</p>
+                            <p class="text-base"><strong>Spanish:</strong> ${v.spanish}</p>
+                        </div>
+                        <button onclick="speakText('${v.pres}, ${v.past}, ${v.future}')" class="bg-white text-slate-700 p-2 rounded-lg border hover:bg-slate-100 shadow-sm tap-target"><i class="fa-solid fa-volume-high"></i></button>
+                    </div>
+                    <p class="text-base text-slate-600 italic leading-relaxed">"${v.exp}"</p>
+                </div>`).join('');
+        }
+
+        function filterVerbList() {
+            const query = document.getElementById('verb-search').value.toLowerCase().trim();
+            document.querySelectorAll('.verb-card-item').forEach(card => {
+                card.style.display = card.getAttribute('data-search').toLowerCase().includes(query) ? 'block' : 'none';
+            });
+        }
+
+        function getAllVocabulary() {
+            const all = [];
+            Object.keys(UNIT_DATA).forEach(unitId => UNIT_DATA[unitId].vocabulary.forEach(v => all.push({...v, unitId: Number(unitId)})));
+            return all;
+        }
+
+        function getFavoriteWords() {
+            return JSON.parse(localStorage.getItem('rb_favoriteWords') || '[]');
+        }
+
+        function toggleFavoriteWord(unitId, word) {
+            let favorites = getFavoriteWords();
+            const key = `${unitId}:${word}`;
+            favorites = favorites.includes(key) ? favorites.filter(x => x !== key) : [...favorites, key];
+            localStorage.setItem('rb_favoriteWords', JSON.stringify(favorites));
+            if (window.location.hash === '#favorite-words') renderVocabularyBank(true);
+            else if (window.location.hash === '#vocabulary-bank') renderVocabularyBank(false);
+            else renderUnitView();
+        }
+
+        function renderVocabularyBank(onlyFavorites = false) {
+            const container = document.getElementById('app-container');
+            const favorites = getFavoriteWords();
+            const words = getAllVocabulary().filter(v => !onlyFavorites || favorites.includes(`${v.unitId}:${v.word}`));
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <div class="flex justify-between items-center border-b pb-3 distraction-element">
+                        <div><span class="text-sm uppercase font-extrabold tracking-widest text-fuchsia-700">Vocabulary Review</span><h2 class="text-3xl font-bold text-slate-900">${onlyFavorites ? 'My Favorite Words' : 'Vocabulary Bank'}</h2></div>
+                        <button onclick="window.location.hash='#home'" class="bg-slate-100 hover:bg-slate-200 p-3 rounded-lg text-slate-700 text-sm font-semibold tap-target"><i class="fa-solid fa-house"></i> Home</button>
+                    </div>
+                    <input id="vocab-bank-search" oninput="filterVocabularyBank()" placeholder="Search in English or Spanish..." class="w-full bg-white border-2 border-fuchsia-200 p-4 rounded-xl text-lg font-bold outline-none focus:border-fuchsia-400">
+                    <div id="vocab-bank-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        ${words.length ? words.map(v => {
+                            const key = `${v.unitId}:${v.word}`; const fav = favorites.includes(key);
+                            return `<div class="vocab-bank-card bg-white border rounded-2xl p-5 shadow-sm space-y-2" data-search="${v.word} ${v.spanish} ${v.definition}">
+                                <div class="flex justify-between gap-3"><div><span class="text-4xl">${v.icon}</span><h3 class="text-2xl font-bold text-indigo-900">${v.word}</h3><p class="font-bold text-emerald-800">${v.spanish}</p></div>
+                                <button onclick="toggleFavoriteWord(${v.unitId}, '${v.word.replace(/'/g,"\\'")}')" class="text-2xl p-2 tap-target" title="Favorite">${fav ? '❤️' : '🤍'}</button></div>
+                                <p>${v.definition}</p><p class="italic text-slate-600">“${v.example}”</p>
+                                <button onclick="speakText('${v.word.replace(/'/g,"\\'")}')" class="text-indigo-700 font-bold tap-target"><i class="fa-solid fa-volume-high mr-1"></i>Listen</button>
+                                <span class="text-xs font-bold text-slate-500 block">Unit ${v.unitId}</span>
+                            </div>`;
+                        }).join('') : '<p class="col-span-full bg-amber-50 p-6 rounded-xl text-center font-bold">No favorite words yet. Open the Vocabulary Bank and tap 🤍 to save difficult words.</p>'}
+                    </div>
+                </div>`;
+        }
+
+        function filterVocabularyBank() {
+            const q = document.getElementById('vocab-bank-search').value.toLowerCase().trim();
+            document.querySelectorAll('.vocab-bank-card').forEach(card => card.style.display = card.getAttribute('data-search').toLowerCase().includes(q) ? 'block' : 'none');
+        }
+
+        function renderProgressDashboard() {
+            const container = document.getElementById('app-container');
+            
+            let unitsHtml = '';
+            for (let uId = 1; uId <= 4; uId++) {
+                const prog = appState.progress[uId];
+                const unitTitle = UNIT_DATA[uId].title;
+                
+                // Calculate percentage complete
+                const keys = Object.keys(prog);
+                const completedCount = keys.filter(k => prog[k]).length;
+                const percentage = Math.round((completedCount / keys.length) * 100);
+
+                unitsHtml += `
+                    <div class="bg-white border-2 border-slate-100 rounded-3xl p-6 shadow-sm space-y-4 text-left">
+                        <div class="flex justify-between items-start flex-wrap gap-2">
+                            <div>
+                                <span class="text-xs uppercase font-extrabold tracking-widest text-indigo-600">Workbook Unit ${uId}</span>
+                                <h3 class="text-2xl font-bold text-slate-900">${unitTitle}</h3>
+                            </div>
+                            <span class="bg-indigo-100 text-indigo-800 text-sm font-extrabold px-3 py-1.5 rounded-full">${percentage}% Complete</span>
+                        </div>
+
+                        <!-- Progress Bar visual -->
+                        <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+                            <div class="bg-indigo-600 h-full transition-all duration-300" style="width: ${percentage}%"></div>
+                        </div>
+
+                        <!-- Steps tracking checklist -->
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 pt-2">
+                            ${renderProgressTaskBadge(prog.intro, "Intro", "fa-info")}
+                            ${renderProgressTaskBadge(prog.reading, "Reading", "fa-book-open")}
+                            ${renderProgressTaskBadge(prog.vocab, "Vocab", "fa-spell-check")}
+                            ${renderProgressTaskBadge(prog.grammar, "Grammar", "fa-brain")}
+                            ${renderProgressTaskBadge(prog.comprehension, "Comprehend", "fa-question")}
+                            ${renderProgressTaskBadge(prog.sentence, "Sentence", "fa-puzzle-piece")}
+                            ${renderProgressTaskBadge(prog.oral, "Oral Speak", "fa-microphone")}
+                            ${renderProgressTaskBadge(prog.final, "Final Quiz", "fa-check-double")}
+                            ${renderProgressTaskBadge(prog.self, "Self-Rating", "fa-face-smile")}
+                        </div>
+
+                        <div class="pt-2 flex flex-wrap gap-2">
+                            <button onclick="startUnitProgress(${uId})" class="bg-indigo-600 hover:bg-indigo-700 text-white text-base font-bold py-3 px-5 rounded-xl flex items-center gap-2 tap-target">
+                                <i class="fa-solid fa-play"></i> Open Unit
+                            </button>
+                            <button onclick="startUnitProgressAtSection(${uId}, 'oral')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-base font-bold py-3 px-5 rounded-xl flex items-center gap-2 tap-target">
+                                <i class="fa-solid fa-microphone"></i> QR Oral Link
+                            </button>
+                            <button onclick="resetUnitProgress(${uId})" class="text-slate-500 text-xs hover:underline py-2 px-3 tap-target">
+                                Reset progress
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = `
+                <div class="space-y-6 text-left font-semibold">
+                    <div class="flex justify-between items-center border-b pb-3 distraction-element">
+                        <div>
+                            <span class="text-sm uppercase font-extrabold tracking-widest text-indigo-600">Personal Dashboard</span>
+                            <h2 class="text-3xl font-bold text-slate-900">My Learning Progress</h2>
+                        </div>
+                        <button onclick="window.location.hash='#home'" class="bg-slate-100 hover:bg-slate-200 p-3 rounded-lg text-slate-700 text-sm font-semibold tap-target">
+                            <i class="fa-solid fa-house"></i> Home
+                        </button>
+                    </div>
+
+                    <p class="text-lg text-slate-600 font-semibold">No score deductions or timers. Keep learning and fill each section with shiny stars! ⭐</p>
+
+                    <div class="space-y-6">
+                        ${unitsHtml}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderProgressTaskBadge(isDone, name, icon) {
+            if (isDone) {
+                return `
+                    <div class="bg-emerald-50 border border-emerald-300 text-emerald-800 p-2.5 rounded-xl flex items-center gap-2 text-xs font-bold shadow-sm">
+                        <i class="fa-solid fa-star text-amber-400"></i>
+                        <span>${name}</span>
+                    </div>
+                `;
+            } else {
+                return `
+                    <div class="bg-slate-100 text-slate-500 p-2.5 rounded-xl flex items-center gap-2 text-xs font-bold border border-slate-200">
+                        <i class="fa-solid ${icon}"></i>
+                        <span>${name}</span>
+                    </div>
+                `;
+            }
+        }
+
+        function startUnitProgress(uId) {
+            currentUnitId = uId;
+            currentSection = 'intro';
+            window.location.hash = `#unit${uId}`;
+        }
+
+        function startUnitProgressAtSection(uId, sectionKey) {
+            currentUnitId = uId;
+            currentSection = sectionKey;
+            window.location.hash = `#unit${uId}/${sectionKey}`;
+        }
+
+        function resetUnitProgress(uId) {
+            if (confirm("Are you sure you want to reset your saved progress for Unit " + uId + "?")) {
+                const keys = Object.keys(appState.progress[uId]);
+                keys.forEach(k => appState.progress[uId][k] = false);
+                localStorage.setItem('rb_progress', JSON.stringify(appState.progress));
+                renderProgressDashboard();
+            }
+        }
+
+        function renderReadingPreferences() {
+            const container = document.getElementById('app-container');
+            
+            container.innerHTML = `
+                <div class="space-y-6 text-left max-w-xl mx-auto font-semibold">
+                    <div class="flex justify-between items-center border-b pb-3 distraction-element">
+                        <div>
+                            <span class="text-sm uppercase font-extrabold tracking-widest text-indigo-600">Preferences Tool</span>
+                            <h2 class="text-3xl font-bold text-slate-900">Reading Preferences</h2>
+                        </div>
+                        <button onclick="window.location.hash='#home'" class="bg-slate-100 hover:bg-slate-200 p-3 rounded-lg text-slate-700 text-sm font-semibold tap-target">
+                            <i class="fa-solid fa-house"></i> Home
+                        </button>
+                    </div>
+
+                    <div class="bg-white border rounded-2xl p-6 space-y-6 shadow-sm">
+                        <!-- Typography Toggle -->
+                        <div class="space-y-2">
+                            <label class="text-lg font-bold text-slate-800 block">Select Font Style:</label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <button onclick="setAppFont('comic')" class="border-2 p-3 rounded-xl font-bold text-lg tap-target ${appState.fontFamily === 'comic' ? 'border-indigo-600 bg-indigo-50 text-indigo-900' : 'border-slate-200 hover:bg-slate-50'}" style="font-family: 'Comic Neue', sans-serif">
+                                    Comic Neue (High Legibility)
+                                </button>
+                                <button onclick="setAppFont('inter')" class="border-2 p-3 rounded-xl font-bold text-lg tap-target ${appState.fontFamily === 'inter' ? 'border-indigo-600 bg-indigo-50 text-indigo-900' : 'border-slate-200 hover:bg-slate-50'}" style="font-family: 'Inter', sans-serif">
+                                    Inter Sans-Serif
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Font Size Adjustment -->
+                        <div class="space-y-2">
+                            <label class="text-lg font-bold text-slate-800 block">Font Size (Current: ${appState.fontSize}px):</label>
+                            <div class="flex items-center gap-3">
+                                <button onclick="changeAppFontSize(-2)" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-extrabold px-4 py-2.5 rounded-xl tap-target"><i class="fa-solid fa-minus"></i> Make Smaller</button>
+                                <button onclick="changeAppFontSize(2)" class="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold px-4 py-2.5 rounded-xl tap-target"><i class="fa-solid fa-plus"></i> Make Larger</button>
+                            </div>
+                        </div>
+
+                        <!-- Line Spacing Adjustment -->
+                        <div class="space-y-2">
+                            <label class="text-lg font-bold text-slate-800 block">Line Spacing (Current: ${appState.lineSpacing}):</label>
+                            <div class="flex items-center gap-3">
+                                <button onclick="changeLineSpacing(-0.2)" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-extrabold px-4 py-2.5 rounded-xl tap-target"><i class="fa-solid fa-align-center"></i> Tighter</button>
+                                <button onclick="changeLineSpacing(0.2)" class="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold px-4 py-2.5 rounded-xl tap-target"><i class="fa-solid fa-align-justify"></i> Wider spacing</button>
+                            </div>
+                        </div>
+
+                        <!-- Word Spacing Adjustment -->
+                        <div class="space-y-2">
+                            <label class="text-lg font-bold text-slate-800 block">Word Spacing (Current: ${appState.wordSpacing}em):</label>
+                            <div class="flex items-center gap-3">
+                                <button onclick="changeWordSpacing(-0.04)" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-extrabold px-4 py-2.5 rounded-xl tap-target">Closer words</button>
+                                <button onclick="changeWordSpacing(0.04)" class="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold px-4 py-2.5 rounded-xl tap-target">Wider words</button>
+                            </div>
+                        </div>
+
+                        <!-- High Contrast Toggle -->
+                        <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border">
+                            <div class="space-y-1">
+                                <span class="text-lg font-bold text-slate-800 block">High Contrast Mode</span>
+                                <span class="text-sm text-slate-500 block font-semibold">Switches to direct dark theme for low stress reading.</span>
+                            </div>
+                            <button onclick="toggleHighContrast()" class="p-3 rounded-xl font-bold tap-target ${appState.highContrast ? 'bg-amber-400 text-slate-900' : 'bg-slate-200 text-slate-700'}">
+                                ${appState.highContrast ? 'Active ON' : 'Turn ON'}
+                            </button>
+                        </div>
+
+                        <!-- Distraction Free Mode -->
+                        <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border">
+                            <div class="space-y-1">
+                                <span class="text-lg font-bold text-slate-800 block">Focus Mode</span>
+                                <span class="text-sm text-slate-500 block font-semibold">Hides navigation headers and footers while studying.</span>
+                            </div>
+                            <button onclick="toggleFocusMode()" class="p-3 rounded-xl font-bold tap-target ${appState.focusMode ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-700'}">
+                                ${appState.focusMode ? 'Active ON' : 'Turn ON'}
+                            </button>
+                        </div>
+
+                        <!-- TTS Voice Selector speed -->
+                        <div class="space-y-3">
+                            <label class="text-lg font-bold text-slate-800 block">Text-to-Speech Speed (${Math.round(appState.ttsSpeed * 100)}%):</label>
+                            <input type="range" min="0.5" max="1.5" step="0.05" value="${appState.ttsSpeed}" onchange="changeTtsSpeed(this.value)" class="w-full">
+                            <div class="flex justify-between text-xs text-slate-400 font-bold">
+                                <span>SLOWER</span>
+                                <span>NORMAL (100%)</span>
+                                <span>FASTER</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function setAppFont(font) {
+            appState.fontFamily = font;
+            saveSettings();
+            renderReadingPreferences();
+        }
+
+        function changeAppFontSize(diff) {
+            appState.fontSize = Math.max(16, Math.min(36, appState.fontSize + diff));
+            saveSettings();
+            renderReadingPreferences();
+        }
+
+        function adjustAppFontSize(diff) {
+            appState.fontSize = Math.max(16, Math.min(36, appState.fontSize + diff));
+            saveSettings();
+            renderUnitView();
+        }
+
+        function changeLineSpacing(diff) {
+            appState.lineSpacing = Math.max(1.2, Math.min(2.6, appState.lineSpacing + diff));
+            saveSettings();
+            renderReadingPreferences();
+        }
+
+        function changeWordSpacing(diff) {
+            appState.wordSpacing = Math.max(0.08, Math.min(0.36, appState.wordSpacing + diff));
+            saveSettings();
+            renderReadingPreferences();
+        }
+
+        function toggleHighContrast() {
+            appState.highContrast = !appState.highContrast;
+            saveSettings();
+            renderReadingPreferences();
+        }
+
+        function toggleFocusMode() {
+            appState.focusMode = !appState.focusMode;
+            saveSettings();
+            renderReadingPreferences();
+        }
+
+        function changeTtsSpeed(val) {
+            appState.ttsSpeed = parseFloat(val);
+            saveSettings();
+            renderReadingPreferences();
+        }
+
+        function renderTeacherInformation() {
+            const container = document.getElementById('app-container');
+            container.innerHTML = `
+                <div class="space-y-6 text-left max-w-2xl mx-auto font-medium">
+                    <div class="flex justify-between items-center border-b pb-3 distraction-element">
+                        <div>
+                            <span class="text-sm uppercase font-extrabold tracking-widest text-indigo-600">Pedagogical Resource</span>
+                            <h2 class="text-3xl font-bold text-slate-900">Teacher's Guide</h2>
+                        </div>
+                        <button onclick="window.location.hash='#home'" class="bg-slate-100 hover:bg-slate-200 p-3 rounded-lg text-slate-700 text-sm font-semibold tap-target">
+                            <i class="fa-solid fa-house"></i> Home
+                        </button>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="bg-indigo-50 p-6 rounded-2xl border-2 border-indigo-100 space-y-3">
+                            <h3 class="text-xl font-bold text-indigo-950"><i class="fa-solid fa-lightbulb"></i> ReadBridge Purpose</h3>
+                            <p class="text-slate-800 text-base leading-relaxed">
+                                ReadBridge is structured specifically for ninth-grade students who benefit from visual layout settings, high readability, and voice options. It removes physical reading strain without altering core English learning targets: <strong>Understanding short stories and correct use of the Past Simple tense.</strong>
+                            </p>
+                        </div>
+
+                        <div class="bg-white border rounded-2xl p-6 space-y-3 shadow-sm">
+                            <h3 class="text-xl font-bold text-slate-900 border-b pb-2"><i class="fa-solid fa-universal-access"></i> Key Features Support</h3>
+                            <ul class="list-disc list-inside space-y-2 text-base text-slate-700">
+                                <li><strong>High Legibility Font:</strong> Comic Neue offers distinct spacing and unique letter weights to maximize contrast and speed.</li>
+                                <li><strong>No Timers or Deductions:</strong> No countdown pressure or penalty systems exist inside the app. Students are graded based on completion.</li>
+                                <li><strong>Color-Coded Grammar:</strong> Subjects are blue, verbs are green, and complements are orange. This visual separation helps process sentence syntax easily.</li>
+                                <li><strong>Dual Sensory Input:</strong> Browser voice generation reads sentences out loud at natural speeds while highlighting the active word stream.</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-white border rounded-2xl p-6 space-y-3 shadow-sm">
+                            <h3 class="text-xl font-bold text-slate-900 border-b pb-2"><i class="fa-solid fa-qrcode"></i> Physical Workbook Integration</h3>
+                            <p class="text-slate-700 text-base">
+                                Each workbook unit contains standard QR codes pointing directly to specific activities. Deep link routes are supported. The URL hashes can be configured to redirect automatically:
+                            </p>
+                            <div class="bg-slate-100 p-4 rounded-xl text-xs space-y-2 text-slate-800 font-mono">
+                                <p><strong>Home Screen Link:</strong> https://[your-url]/#home</p>
+                                <p><strong>Unit 1 Story QR Link:</strong> https://[your-url]/#unit1</p>
+                                <p><strong>Unit 2 Story QR Link:</strong> https://[your-url]/#unit2</p>
+                                <p><strong>Unit 3 Story QR Link:</strong> https://[your-url]/#unit3</p>
+                                <p><strong>Unit 4 Story QR Link:</strong> https://[your-url]/#unit4</p>
+                                <p><strong>Unit 1 Oral QR Link:</strong> https://[your-url]/#unit1/oral</p>
+                                <p><strong>Unit 2 Oral QR Link:</strong> https://[your-url]/#unit2/oral</p>
+                                <p><strong>Unit 3 Oral QR Link:</strong> https://[your-url]/#unit3/oral</p>
+                                <p><strong>Unit 4 Oral QR Link:</strong> https://[your-url]/#unit4/oral</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-white border rounded-2xl p-6 space-y-3 shadow-sm">
+                            <h3 class="text-xl font-bold text-slate-900 border-b pb-2"><i class="fa-solid fa-shield-halved"></i> Privacy Safeguard</h3>
+                            <p class="text-slate-700 text-base leading-relaxed">
+                                No outer database is maintained. Preferences and unit completion statistics are saved locally inside the browser instance's <code class="bg-slate-100 px-1 py-0.5 rounded text-indigo-700 font-mono">localStorage</code>. Spoken recordings stay directly within device memory and do not upload to outer servers.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
+
